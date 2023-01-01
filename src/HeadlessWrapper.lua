@@ -64,9 +64,6 @@ end
 function StripEscapes(text)
 	return text:gsub("^%d",""):gsub("^x%x%x%x%x%x%x","")
 end
-function GetAsyncCount()
-	return 0
-end
 
 -- Search Handles
 function NewFileSearch() end
@@ -78,14 +75,14 @@ function GetCursorPos()
 end
 function SetCursorPos(x, y) end
 function ShowCursor(doShow) end
-function IsKeyDown(keyName) end
-function Copy(text) end
+function engine:IsKeyDown(keyName) end
+function  engine:Copy(text) end
 function Paste() end
-function Deflate(data)
+function engine:Deflate(data)
 	-- TODO: Might need this
 	return ""
 end
-function Inflate(data)
+function engine:Inflate(data)
 	-- TODO: And this
 	return ""
 end

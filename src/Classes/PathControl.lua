@@ -39,7 +39,7 @@ function PathClass:SetSubPath(subPath, noUndo)
 		button.shown = true
 		button.x = x
 		button.label = folder.label
-		button.width = DrawStringWidth(self.height - 8, "VAR", folder.label) + 10
+		button.width = graphics:DrawStringWidth(self.height - 8, "VAR", folder.label) + 10
 		button.onClick = function()
 			self:SetSubPath(folder.path)
 		end
@@ -69,19 +69,19 @@ end
 function PathClass:Draw(viewPort)
 	local x, y = self:GetPos()
 	local width, height = self:GetSize()
-	SetDrawColor(0.5, 0.5, 0.5)
-	DrawImage(nil, x, y, width, height)
-	SetDrawColor(0, 0, 0)
-	DrawImage(nil, x + 1, y + 1, width - 2, height - 2)
+	graphics:SetDrawColor(0.5, 0.5, 0.5)
+	graphics:DrawImage(nil, x, y, width, height)
+	graphics:SetDrawColor(0, 0, 0)
+	graphics:DrawImage(nil, x + 1, y + 1, width - 2, height - 2)
 	self:DrawControls(viewPort)
 	for index, folder in ipairs(self.folderList) do
 		local buttonX, buttonY = folder.button:GetPos()
 		local buttonW, buttonH = folder.button:GetSize()
-		SetDrawColor(1, 1, 1)
+		graphics:SetDrawColor(1, 1, 1)
 		main:DrawArrow(buttonX + buttonW + 6, y + height/2, 8, 8, "RIGHT")
 		if self.otherDragSource and index < #self.folderList then
-			SetDrawColor(0, 1, 0, 0.25)
-			DrawImage(nil, buttonX, buttonY, buttonW, buttonH)
+			graphics:SetDrawColor(0, 1, 0, 0.25)
+			graphics:DrawImage(nil, buttonX, buttonY, buttonW, buttonH)
 		end
 	end
 end

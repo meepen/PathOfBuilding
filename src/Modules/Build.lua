@@ -86,7 +86,7 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild)
 	self.controls.buildName = new("Control", {"LEFT",self.controls.back,"RIGHT"}, 8, 0, 0, 20)
 	self.controls.buildName.width = function(control)
 		local limit = self.anchorTopBarRight:GetPos() - 98 - 40 - self.controls.back:GetSize() - self.controls.save:GetSize() - self.controls.saveAs:GetSize()
-		local bnw = DrawStringWidth(16, "VAR", self.buildName)
+		local bnw = graphics:DrawStringWidth(16, "VAR", self.buildName)
 		self.strWidth = m_min(bnw, limit)
 		self.strLimited = bnw > limit
 		return self.strWidth + 98
@@ -94,16 +94,16 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild)
 	self.controls.buildName.Draw = function(control)
 		local x, y = control:GetPos()
 		local width, height = control:GetSize()
-		SetDrawColor(0.5, 0.5, 0.5)
-		DrawImage(nil, x + 91, y, self.strWidth + 6, 20)
-		SetDrawColor(0, 0, 0)
-		DrawImage(nil, x + 92, y + 1, self.strWidth + 4, 18)
-		SetDrawColor(1, 1, 1)
-		SetViewport(x, y + 2, self.strWidth + 94, 16)
-		DrawString(0, 0, "LEFT", 16, "VAR", "Current build:  "..self.buildName)
-		SetViewport()
+		graphics:SetDrawColor(0.5, 0.5, 0.5)
+		graphics:DrawImage(nil, x + 91, y, self.strWidth + 6, 20)
+		graphics:SetDrawColor(0, 0, 0)
+		graphics:DrawImage(nil, x + 92, y + 1, self.strWidth + 4, 18)
+		graphics:SetDrawColor(1, 1, 1)
+		graphics:SetViewport(x, y + 2, self.strWidth + 94, 16)
+		graphics:DrawString(0, 0, "LEFT", 16, "VAR", "Current build:  "..self.buildName)
+		graphics:SetViewport()
 		if control:IsMouseInBounds() then
-			SetDrawLayer(nil, 10)
+			graphics:SetDrawLayer(nil, 10)
 			miscTooltip:Clear()
 			if self.dbFileSubPath and self.dbFileSubPath ~= "" then
 				miscTooltip:AddLine(16, self.dbFileSubPath..self.buildName)
@@ -111,7 +111,7 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild)
 				miscTooltip:AddLine(16, self.buildName)
 			end
 			miscTooltip:Draw(x, y, width, height, main.viewPort)
-			SetDrawLayer(nil, 0)
+			graphics:SetDrawLayer(nil, 0)
 		end
 	end
 	self.controls.save = new("ButtonControl", {"LEFT",self.controls.buildName,"RIGHT"}, 8, 0, 50, 20, "Save", function()
@@ -184,23 +184,23 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild)
 		
 		if PointsUsed > usedMax then InsertIfNew(self.controls.warnings.lines, "You have too many passive points allocated") end
 		if AscUsed > ascMax then InsertIfNew(self.controls.warnings.lines, "You have too many ascendancy points allocated") end
-		return DrawStringWidth(16, "FIXED", control.str) + 8
+		return graphics:DrawStringWidth(16, "FIXED", control.str) + 8
 	end
 	self.controls.pointDisplay.Draw = function(control)
 		local x, y = control:GetPos()
 		local width, height = control:GetSize()
-		SetDrawColor(1, 1, 1)
-		DrawImage(nil, x, y, width, height)
-		SetDrawColor(0, 0, 0)
-		DrawImage(nil, x + 1, y + 1, width - 2, height - 2)
-		SetDrawColor(1, 1, 1)
-		DrawString(x + 4, y + 2, "LEFT", 16, "FIXED", control.str)
+		graphics:SetDrawColor(1, 1, 1)
+		graphics:DrawImage(nil, x, y, width, height)
+		graphics:SetDrawColor(0, 0, 0)
+		graphics:DrawImage(nil, x + 1, y + 1, width - 2, height - 2)
+		graphics:SetDrawColor(1, 1, 1)
+		graphics:DrawString(x + 4, y + 2, "LEFT", 16, "FIXED", control.str)
 		if control:IsMouseInBounds() then
-			SetDrawLayer(nil, 10)
+			graphics:SetDrawLayer(nil, 10)
 			miscTooltip:Clear()
 			miscTooltip:AddLine(16, control.req)
 			miscTooltip:Draw(x, y, width, height, main.viewPort)
-			SetDrawLayer(nil, 0)
+			graphics:SetDrawLayer(nil, 0)
 		end
 	end
 	self.controls.characterLevel = new("EditControl", {"LEFT",self.controls.pointDisplay,"RIGHT"}, 12, 0, 106, 20, "", "Level", "%D", 3, function(buf)
@@ -601,7 +601,7 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild)
 	self.controls.warnings = new("Control",{"TOPLEFT",self.controls.statBox,"BOTTOMLEFT",true}, 0, 0, 0, 18)
 	self.controls.warnings.lines = {}
 	self.controls.warnings.width = function(control)
-		return control.str and DrawStringWidth(16, "FIXED", control.str) + 8 or 0
+		return control.str and graphics:DrawStringWidth(16, "FIXED", control.str) + 8 or 0
 	end
 	self.controls.warnings.Draw = function(control)
 		if #self.controls.warnings.lines > 0 then
@@ -610,13 +610,13 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild)
 			control.str = string.format("^1%d Warnings", count)
 			local x, y = control:GetPos()
 			local width, height = control:GetSize()
-			DrawString(x, y + 2, "LEFT", 16, "FIXED", control.str)
+			graphics:DrawString(x, y + 2, "LEFT", 16, "FIXED", control.str)
 			if control:IsMouseInBounds() then
-				SetDrawLayer(nil, 10)
+				graphics:SetDrawLayer(nil, 10)
 				miscTooltip:Clear()
 				for k,v in pairs(self.controls.warnings.lines) do miscTooltip:AddLine(16, v) end
 				miscTooltip:Draw(x, y, width, height, main.viewPort)
-				SetDrawLayer(nil, 0)
+				graphics:SetDrawLayer(nil, 0)
 			end
 		else
 			control.str = {}
@@ -737,13 +737,13 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild)
 	--]]
 
 	--[[
-	local start = GetTime()
+	local start = engine:GetTime()
 	SetProfiling(true)
 	for i = 1, 10  do
 		self.calcsTab:PowerBuilder()
 	end
 	SetProfiling(false)
-	ConPrintf("Power build time: %d ms", GetTime() - start)
+	ConPrintf("Power build time: %d ms", engine:GetTime() - start)
 	--]]
 
 	self.abortSave = false
@@ -922,7 +922,7 @@ function buildMode:OnFrame(inputEvents)
 				else
 					self:CloseBuild()
 				end
-		elseif IsKeyDown("CTRL") then
+		elseif engine:IsKeyDown("CTRL") then
 				if event.key == "i" then
 						self.viewMode = "IMPORT"
 					self.importTab:SelectControl(self.importTab.controls.importCodeIn)
@@ -1016,20 +1016,20 @@ function buildMode:OnFrame(inputEvents)
 
 	self.unsaved = self.modFlag or self.notesTab.modFlag or self.configTab.modFlag or self.treeTab.modFlag or self.spec.modFlag or self.skillsTab.modFlag or self.itemsTab.modFlag or self.calcsTab.modFlag
 
-	SetDrawLayer(5)
+	graphics:SetDrawLayer(5)
 
 	-- Draw top bar background
-	SetDrawColor(0.2, 0.2, 0.2)
-	DrawImage(nil, 0, 0, main.screenW, 28)
-	SetDrawColor(0.85, 0.85, 0.85)
-	DrawImage(nil, 0, 28, main.screenW, 4)
-	DrawImage(nil, main.screenW/2 - 2, 0, 4, 28)
+	graphics:SetDrawColor(0.2, 0.2, 0.2)
+	graphics:DrawImage(nil, 0, 0, main.screenW, 28)
+	graphics:SetDrawColor(0.85, 0.85, 0.85)
+	graphics:DrawImage(nil, 0, 28, main.screenW, 4)
+	graphics:DrawImage(nil, main.screenW/2 - 2, 0, 4, 28)
 
 	-- Draw side bar background
-	SetDrawColor(0.1, 0.1, 0.1)
-	DrawImage(nil, 0, 32, sideBarWidth - 4, main.screenH - 32)
-	SetDrawColor(0.85, 0.85, 0.85)
-	DrawImage(nil, sideBarWidth - 4, 32, 4, main.screenH - 32)
+	graphics:SetDrawColor(0.1, 0.1, 0.1)
+	graphics:DrawImage(nil, 0, 32, sideBarWidth - 4, main.screenH - 32)
+	graphics:SetDrawColor(0.85, 0.85, 0.85)
+	graphics:DrawImage(nil, sideBarWidth - 4, 32, 4, main.screenH - 32)
 
 	self:DrawControls(main.viewPort)
 end
@@ -1080,7 +1080,7 @@ function buildMode:OpenSavePopup(mode)
 		if mode == "LIST" then
 			self:CloseBuild()
 		elseif mode == "EXIT" then
-			Exit()
+			engine:Exit()
 		elseif mode == "UPDATE" then
 			launch:ApplyUpdate(launch.updateAvailable)
 		end
@@ -1604,7 +1604,7 @@ function buildMode:SaveDBFile()
 	if action == "LIST" then
 		self:CloseBuild()
 	elseif action == "EXIT" then
-		Exit()
+		engine:Exit()
 	elseif action == "UPDATE" then
 		launch:ApplyUpdate(launch.updateAvailable)
 	end

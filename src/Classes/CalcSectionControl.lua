@@ -65,7 +65,7 @@ function CalcSectionClass:IsMouseOver()
 	for _, subSec in ipairs(self.subSection) do
 		if mOver and not subSec.collapsed and self.enabled then
 			-- Check if mouse is over one of the cells
-			local cursorX, cursorY = GetCursorPos()
+			local cursorX, cursorY = engine:GetCursorPos()
 			for _, data in ipairs(subSec.data) do
 				if data.enabled then
 					for _, colData in ipairs(data) do
@@ -215,37 +215,37 @@ end
 function CalcSectionClass:Draw(viewPort, noTooltip)
 	local x, y = self:GetPos()
 	local width, height = self:GetSize()
-	local cursorX, cursorY = GetCursorPos()
+	local cursorX, cursorY = engine:GetCursorPos()
 	local actor = self.calcsTab.input.showMinion and self.calcsTab.calcsEnv.minion or self.calcsTab.calcsEnv.player
 	-- Draw border and background
-	SetDrawLayer(nil, -10)
-	SetDrawColor(self.colour)
-	DrawImage(nil, x, y, width, height)
-	SetDrawColor(0.10, 0.10, 0.10)
-	DrawImage(nil, x + 2, y + 2, width - 4, height - 4)
+	graphics:SetDrawLayer(nil, -10)
+	graphics:SetDrawColor(self.colour)
+	graphics:DrawImage(nil, x, y, width, height)
+	graphics:SetDrawColor(0.10, 0.10, 0.10)
+	graphics:DrawImage(nil, x + 2, y + 2, width - 4, height - 4)
 	
 	local primary = true
 	local lineY = y
 	for _, subSec in ipairs(self.subSection) do
 		-- Draw line above label
-		SetDrawColor(self.colour)
-		DrawImage(nil, x + 2, lineY, width - 4, 2)
-		SetDrawColor(0.10, 0.10, 0.10)
+		graphics:SetDrawColor(self.colour)
+		graphics:DrawImage(nil, x + 2, lineY, width - 4, 2)
+		graphics:SetDrawColor(0.10, 0.10, 0.10)
 		-- Draw label
 		if not self.enabled then
-			DrawString(x + 3, lineY + 3, "LEFT", 16, "VAR BOLD", "^8"..subSec.label)
+			graphics:DrawString(x + 3, lineY + 3, "LEFT", 16, "VAR BOLD", "^8"..subSec.label)
 		else
-			DrawString(x + 3, lineY + 3, "LEFT", 16, "VAR BOLD", "^7"..subSec.label..":")
+			graphics:DrawString(x + 3, lineY + 3, "LEFT", 16, "VAR BOLD", "^7"..subSec.label..":")
 			if subSec.data.extra then
-				local x = x + 3 + DrawStringWidth(16, "VAR BOLD", subSec.label) + 10
-				DrawString(x, lineY + 3, "LEFT", 16, "VAR", self:FormatStr(subSec.data.extra, actor))
+				local x = x + 3 + graphics:DrawStringWidth(16, "VAR BOLD", subSec.label) + 10
+				graphics:DrawString(x, lineY + 3, "LEFT", 16, "VAR", self:FormatStr(subSec.data.extra, actor))
 			end
 		end
 		-- Draw line below label
-		SetDrawColor(self.colour)
-		DrawImage(nil, x + 2, lineY + 20, width - 4, 2)
+		graphics:SetDrawColor(self.colour)
+		graphics:DrawImage(nil, x + 2, lineY + 20, width - 4, 2)
 		-- Draw controls
-		SetDrawLayer(nil, 0)
+		graphics:SetDrawLayer(nil, 0)
 		self:DrawControls(viewPort, noTooltip and self.calcsTab.selControl)
 		if subSec.collapsed or not self.enabled then
 			if primary then
@@ -265,32 +265,32 @@ function CalcSectionClass:Draw(viewPort, noTooltip)
 					end
 					if rowData.label then
 						-- Draw row label with background
-						SetDrawColor(rowData.bgCol or "^0")
-						DrawImage(nil, x + 2, lineY, 130, 18)
-						DrawString(x + 132, lineY + 1, "RIGHT_X", 16, "VAR", textColor..rowData.label.."^7:")
+						graphics:SetDrawColor(rowData.bgCol or "^0")
+						graphics:DrawImage(nil, x + 2, lineY, 130, 18)
+						graphics:DrawString(x + 132, lineY + 1, "RIGHT_X", 16, "VAR", textColor..rowData.label.."^7:")
 					end
 					for colour, colData in ipairs(rowData) do
 						-- Draw column separator at the left end of the cell
-						SetDrawColor(self.colour)
-						DrawImage(nil, colData.x, lineY, 2, colData.height)
+						graphics:SetDrawColor(self.colour)
+						graphics:DrawImage(nil, colData.x, lineY, 2, colData.height)
 						if colData.format and self.calcsTab:CheckFlag(colData) then
 							if cursorY >= viewPort.y and cursorY < viewPort.y + viewPort.height and cursorX >= colData.x and cursorY >= colData.y and cursorX < colData.x + colData.width and cursorY < colData.y + colData.height then
 						self.calcsTab:SetDisplayStat(colData)
 					end
 					if self.calcsTab.displayData == colData then
 						-- This is the display stat, draw a green border around this cell
-						SetDrawColor(0.25, 1, 0.25)
-						DrawImage(nil, colData.x + 2, colData.y, colData.width - 2, colData.height)
-						SetDrawColor(rowData.bgCol or "^0")
-						DrawImage(nil, colData.x + 3, colData.y + 1, colData.width - 4, colData.height - 2)
+						graphics:SetDrawColor(0.25, 1, 0.25)
+						graphics:DrawImage(nil, colData.x + 2, colData.y, colData.width - 2, colData.height)
+						graphics:SetDrawColor(rowData.bgCol or "^0")
+						graphics:DrawImage(nil, colData.x + 3, colData.y + 1, colData.width - 4, colData.height - 2)
 					else
-						SetDrawColor(rowData.bgCol or "^0")
-						DrawImage(nil, colData.x + 2, colData.y, colData.width - 2, colData.height)
+						graphics:SetDrawColor(rowData.bgCol or "^0")
+						graphics:DrawImage(nil, colData.x + 2, colData.y, colData.width - 2, colData.height)
 					end
 					local textSize = rowData.textSize or 14
-					SetViewport(colData.x + 3, colData.y, colData.width - 4, colData.height)
-					DrawString(1, 9 - textSize/2, "LEFT", textSize, "VAR", "^7"..self:FormatStr(colData.format, actor, colData))
-					SetViewport()
+					graphics:SetViewport(colData.x + 3, colData.y, colData.width - 4, colData.height)
+					graphics:DrawString(1, 9 - textSize/2, "LEFT", textSize, "VAR", "^7"..self:FormatStr(colData.format, actor, colData))
+					graphics:SetViewport()
 				end
 			end
 			lineY = lineY + 18

@@ -600,7 +600,7 @@ function TradeQueryClass:PriceItemRowDisplay(str_cnt, slotTbl, top_pane_alignmen
 	controls["whisperButton"..str_cnt] = new("ButtonControl", {"TOPLEFT",controls["importButton"..str_cnt],"TOPRIGHT"}, 8, 0, 185, row_height, function()
 		return self.totalPrice[str_cnt] and "Whisper for " .. self.totalPrice[str_cnt].amount .. " " .. self.totalPrice[str_cnt].currency or "Whisper"
 	end, function()
-		Copy(self.resultTbl[str_cnt][self.itemIndexTbl[str_cnt]].whisper)
+		 engine:Copy(self.resultTbl[str_cnt][self.itemIndexTbl[str_cnt]].whisper)
 	end)
 	controls["whisperButton"..str_cnt].enabled = function()
 		return self.itemIndexTbl[str_cnt] and self.resultTbl[str_cnt][self.itemIndexTbl[str_cnt]].whisper ~= nil

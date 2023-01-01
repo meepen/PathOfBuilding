@@ -32,7 +32,7 @@ function SharedItemListClass:AddValueTooltip(tooltip, index, item)
 		tooltip:Clear()
 		return
 	end
-	if tooltip:CheckForUpdate(item, IsKeyDown("SHIFT"), launch.devModeAlt, self.itemsTab.build.outputRevision) then
+	if tooltip:CheckForUpdate(item, engine:IsKeyDown("SHIFT"), launch.devModeAlt, self.itemsTab.build.outputRevision) then
 		self.itemsTab:AddItemTooltip(tooltip, item)
 	end
 end
@@ -60,7 +60,7 @@ function SharedItemListClass:OnSelClick(index, item, doubleClick)
 end
 
 function SharedItemListClass:OnSelCopy(index, item)
-	Copy(item:BuildRaw():gsub("\n","\r\n"))
+	 engine:Copy(item:BuildRaw():gsub("\n","\r\n"))
 end
 
 function SharedItemListClass:OnSelDelete(index, item)

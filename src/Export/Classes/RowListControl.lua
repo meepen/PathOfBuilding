@@ -46,11 +46,11 @@ function RowListClass:BuildColumns()
 	wipeTable(self.colList)
 	self.colList[1] = { width = 50, label = "#", font = "FIXED" }
 	for _, specCol in ipairs(main.curDatFile.spec) do
-		t_insert(self.colList, { width = specCol.width, label = specCol.name, font = function() return IsKeyDown("CTRL") and "FIXED" or "VAR" end })
+		t_insert(self.colList, { width = specCol.width, label = specCol.name, font = function() return engine:IsKeyDown("CTRL") and "FIXED" or "VAR" end })
 	end
 	local short = main.curDatFile.rowSize - main.curDatFile.specSize
 	if short > 0 then
-		t_insert(self.colList, { width = short * DrawStringWidth(self.rowHeight, "FIXED", "00 "), font = "FIXED" })
+		t_insert(self.colList, { width = short * graphics:DrawStringWidth(self.rowHeight, "FIXED", "00 "), font = "FIXED" })
 	end
 end
 
@@ -58,7 +58,7 @@ function RowListClass:GetRowValue(column, index, row)
 	if column == 1 then
 		return string.format("%5d", row)
 	end
-	if not main.curDatFile.spec[column - 1] or IsKeyDown("CTRL") then
+	if not main.curDatFile.spec[column - 1] or engine:IsKeyDown("CTRL") then
 		local out = { main.curDatFile:ReadCellRaw(row, column - 1) }
 		for i, b in ipairs(out) do
 			out[i] = string.format("%02X", b)

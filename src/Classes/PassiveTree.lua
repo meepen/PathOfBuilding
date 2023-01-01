@@ -53,7 +53,7 @@ local PassiveTreeClass = newClass("PassiveTree", function(self, treeVersion)
 
 	self.legion = LoadModule("Data/LegionPassives")
 
-	MakeDir("TreeData")
+	engine:MakeDir("TreeData")
 
 	ConPrintf("Loading passive tree data for version '%s'...", treeVersions[treeVersion].display)
 	local treeText
@@ -183,7 +183,7 @@ local PassiveTreeClass = newClass("PassiveTree", function(self, treeVersion)
 		local sheet = spriteSheets[maxZoom.filename]
 		if not sheet then
 			sheet = { }
-			sheet.handle = NewImageHandle()
+			sheet.handle = Image.New()
 			sheet.handle:Load("TreeData/legion/"..maxZoom.filename)
 			sheet.width, sheet.height = sheet.handle:ImageSize()
 			spriteSheets[maxZoom.filename] = sheet
@@ -622,7 +622,7 @@ function PassiveTreeClass:LoadImage(imgName, url, data, ...)
 			end
 		end
 	end
-	data.handle = NewImageHandle()
+	data.handle = Image.New()
 	data.handle:Load("TreeData/"..imgName, ...)
 	data.width, data.height = data.handle:ImageSize()
 end

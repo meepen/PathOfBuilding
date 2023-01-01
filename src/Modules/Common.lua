@@ -303,7 +303,7 @@ end
 
 -- Check if mouse is currently inside area defined by region.x, region.y, region.width, region.height
 function isMouseInRegion(region)
-	local cursorX, cursorY = GetCursorPos()
+	local cursorX, cursorY = engine:GetCursorPos()
 	return cursorX >= region.x and cursorX < region.x + region.width and cursorY >= region.y and cursorY < region.y + region.height
 end
 

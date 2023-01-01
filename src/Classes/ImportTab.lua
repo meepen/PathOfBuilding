@@ -73,7 +73,7 @@ local ImportTabClass = newClass("ImportTab", "ControlHost", "Control", function(
 
 	self.controls.accountNameUnicode = new("LabelControl", {"TOPLEFT",self.controls.accountRealm,"BOTTOMLEFT"}, 0, 16, 0, 14, "^7Note: if the account name contains non-ASCII characters then it must be URL encoded first.")
 	self.controls.accountNameURLEncoder = new("ButtonControl", {"TOPLEFT",self.controls.accountNameUnicode,"BOTTOMLEFT"}, 0, 4, 170, 18, "^x4040FFhttps://www.urlencoder.org/", function()
-		OpenURL("https://www.urlencoder.org/")
+		engine:OpenURL("https://www.urlencoder.org/")
 	end)
 
 	-- Stage: input POESESSID
@@ -100,7 +100,7 @@ You can get this from your web browser's cookies while logged into the Path of E
 		self.charImportStatus = "Idle"
 	end)
 	self.controls.sessionPrivacySettings = new("ButtonControl", {"LEFT",self.controls.sessionCancel,"RIGHT"}, 8, 0, 120, 20, "Privacy Settings", function()
-		OpenURL('https://www.pathofexile.com/my-account/privacy')
+		engine:OpenURL('https://www.pathofexile.com/my-account/privacy')
 	end)
 	self.controls.sessionInput = new("EditControl", {"TOPLEFT",self.controls.sessionRetry,"BOTTOMLEFT"}, 0, 8, 350, 20, "", "POESESSID", "%X", 32)
 	self.controls.sessionInput:SetProtected(true)
@@ -157,14 +157,14 @@ You can get this from your web browser's cookies while logged into the Path of E
 	self.controls.sectionBuild = new("SectionControl", {"TOPLEFT",self.controls.sectionCharImport,"BOTTOMLEFT"}, 0, 18, 600, 182, "Build Sharing")
 	self.controls.generateCodeLabel = new("LabelControl", {"TOPLEFT",self.controls.sectionBuild,"TOPLEFT"}, 6, 14, 0, 16, "^7Generate a code to share this build with other Path of Building users:")
 	self.controls.generateCode = new("ButtonControl", {"LEFT",self.controls.generateCodeLabel,"RIGHT"}, 4, 0, 80, 20, "Generate", function()
-		self.controls.generateCodeOut:SetText(common.base64.encode(Deflate(self.build:SaveDB("code"))):gsub("+","-"):gsub("/","_"))
+		self.controls.generateCodeOut:SetText(common.base64.encode(engine:Deflate(self.build:SaveDB("code"))):gsub("+","-"):gsub("/","_"))
 	end)
 	self.controls.generateCodeOut = new("EditControl", {"TOPLEFT",self.controls.generateCodeLabel,"BOTTOMLEFT"}, 0, 8, 250, 20, "", "Code", "%Z")
 	self.controls.generateCodeOut.enabled = function()
 		return #self.controls.generateCodeOut.buf > 0
 	end
 	self.controls.generateCodeCopy = new("ButtonControl", {"LEFT",self.controls.generateCodeOut,"RIGHT"}, 8, 0, 60, 20, "Copy", function()
-		Copy(self.controls.generateCodeOut.buf)
+		 engine:Copy(self.controls.generateCodeOut.buf)
 		self.controls.generateCodeOut:SetText("")
 	end)
 	self.controls.generateCodeCopy.enabled = function()
@@ -257,12 +257,12 @@ You can get this from your web browser's cookies while logged into the Path of E
 			end
 		end
 
-		local xmlText = Inflate(common.base64.decode(buf:gsub("-","+"):gsub("_","/")))
+		local xmlText = engine:Inflate(common.base64.decode(buf:gsub("-","+"):gsub("_","/")))
 		if not xmlText then
 			return
 		end
-		if launch.devMode and IsKeyDown("SHIFT") then
-			Copy(xmlText)
+		if launch.devMode and engine:IsKeyDown("SHIFT") then
+			 engine:Copy(xmlText)
 		end
 		self.importCodeValid = true
 		self.importCodeDetail = colorCodes.POSITIVE.."Code is valid"

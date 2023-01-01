@@ -371,7 +371,7 @@ function TradeQueryGeneratorClass:InitMods()
 end
 
 function TradeQueryGeneratorClass:GenerateModWeights(modsToTest)
-	local start = GetTime()
+	local start = engine:GetTime()
 	for _, entry in pairs(modsToTest) do
 		if entry[self.calcContext.itemCategory] ~= nil then
 			if self.alreadyWeightedMods[entry.tradeMod.id] ~= nil then -- Don't calculate the same thing twice (can happen with corrupted vs implicit)
@@ -409,7 +409,7 @@ function TradeQueryGeneratorClass:GenerateModWeights(modsToTest)
 				self.alreadyWeightedMods[entry.tradeMod.id] = true
 			end
 
-			local now = GetTime()
+			local now = engine:GetTime()
 			if now - start > 50 then
 				-- Would be nice to update x/y progress on the popup here, but getting y ahead of time has a cost, and the visual seems to update on a significant delay anyways so it's not very useful
 				coroutine.yield()

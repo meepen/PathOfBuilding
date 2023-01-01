@@ -140,7 +140,7 @@ function ListClass:Draw(viewPort, noTooltip)
 	scrollBarH:SetContentDimension(lastCol._offset + lastCol._width, rowRegion.width)
 	local scrollOffsetH = scrollBarH.offset
 
-	local cursorX, cursorY = GetCursorPos()
+	local cursorX, cursorY = engine:GetCursorPos()
 	if self.selValue and self.selDragging and not self.selDragActive and (cursorX-self.selCX)*(cursorX-self.selCX)+(cursorY-self.selCY)*(cursorY-self.selCY) > 100 then
 		self.selDragActive = true
 		if self.dragTargetList then
@@ -175,25 +175,25 @@ function ListClass:Draw(viewPort, noTooltip)
 
 	local label = self:GetProperty("label") 
 	if label then
-		DrawString(x, y - 20, "LEFT", 16, self.font, label)
+		graphics:DrawString(x, y - 20, "LEFT", 16, self.font, label)
 	end
 	if self.otherDragSource and not self.CanDragToValue then
-		SetDrawColor(0.2, 0.6, 0.2)
+		graphics:SetDrawColor(0.2, 0.6, 0.2)
 	elseif self.hasFocus then
-		SetDrawColor(1, 1, 1)
+		graphics:SetDrawColor(1, 1, 1)
 	else
-		SetDrawColor(0.5, 0.5, 0.5)
+		graphics:SetDrawColor(0.5, 0.5, 0.5)
 	end
-	DrawImage(nil, x, y, width, height)
+	graphics:DrawImage(nil, x, y, width, height)
 	if self.otherDragSource and not self.CanDragToValue then
-		SetDrawColor(0, 0.05, 0)
+		graphics:SetDrawColor(0, 0.05, 0)
 	else
-		SetDrawColor(0, 0, 0)
+		graphics:SetDrawColor(0, 0, 0)
 	end
-	DrawImage(nil, x + 1, y + 1, width - 2, height - 2)
+	graphics:DrawImage(nil, x + 1, y + 1, width - 2, height - 2)
 	self:DrawControls(viewPort, (noTooltip and not self.forceTooltip) and self)
 
-	SetViewport(x + 2, y + 2,  self.scroll and width - 20 or width, height - 4 - (self.scroll and self.scrollH and 16 or 0))
+	graphics:SetViewport(x + 2, y + 2,  self.scroll and width - 20 or width, height - 4 - (self.scroll and self.scrollH and 16 or 0))
 	local textOffsetY = self.showRowSeparators and 2 or 0
 	local textHeight = rowHeight - textOffsetY * 2
 	local ttIndex, ttValue, ttX, ttY, ttWidth
@@ -201,7 +201,7 @@ function ListClass:Draw(viewPort, noTooltip)
 	local maxIndex = m_min(m_floor((scrollOffsetV + height) / rowHeight + 1), #list)
 	for colIndex, column in ipairs(self.colList) do
 		local colFont = self:GetColumnProperty(column, "font") or "VAR"
-		local clipWidth = DrawStringWidth(textHeight, colFont, "...")
+		local clipWidth = graphics:DrawStringWidth(textHeight, colFont, "...")
 		colOffset = column._offset - scrollOffsetH
 		local colWidth = column._width
 		local relX = cursorX - (x + 2)
@@ -210,11 +210,11 @@ function ListClass:Draw(viewPort, noTooltip)
 			local lineY = rowHeight * (index - 1) - scrollOffsetV + (self.colLabels and 18 or 0)
 			local value = list[index]
 			local text = self:GetRowValue(colIndex, index, value)
-			local textWidth = DrawStringWidth(textHeight, colFont, text)
+			local textWidth = graphics:DrawStringWidth(textHeight, colFont, text)
 			if textWidth > colWidth - 2 then
-				local clipIndex = DrawStringCursorIndex(textHeight, colFont, text, colWidth - clipWidth - 2, 0)
+				local clipIndex = graphics:DrawStringCursorIndex(textHeight, colFont, text, colWidth - clipWidth - 2, 0)
 				text = text:sub(1, clipIndex - 1) .. "..."
-				textWidth = DrawStringWidth(textHeight, colFont, text)
+				textWidth = graphics:DrawStringWidth(textHeight, colFont, text)
 			end
 			if not scrollBarV.dragging and (not self.selDragActive or (self.CanDragToValue and self:CanDragToValue(index, value, self.otherDragSource))) then
 				if relX >= colOffset and relX <  (self.scroll and width - 20 or width) and relY >= 0 and relY >= lineY and relY < height - 2 - (self.scroll and self.scrollH and 18 or 0) and relY < lineY + rowHeight then
@@ -227,76 +227,76 @@ function ListClass:Draw(viewPort, noTooltip)
 			end
 			if self.showRowSeparators then
 				if self.hasFocus and value == self.selValue then
-					SetDrawColor(1, 1, 1)
+					graphics:SetDrawColor(1, 1, 1)
 				elseif value == ttValue then
-					SetDrawColor(0.8, 0.8, 0.8)
+					graphics:SetDrawColor(0.8, 0.8, 0.8)
 				else
-					SetDrawColor(0.5, 0.5, 0.5)
+					graphics:SetDrawColor(0.5, 0.5, 0.5)
 				end
-				DrawImage(nil, colOffset, lineY, not self.scroll and colWidth - 4 or colWidth, rowHeight)
+				graphics:DrawImage(nil, colOffset, lineY, not self.scroll and colWidth - 4 or colWidth, rowHeight)
 				if (value == self.selValue or value == ttValue) then
-					SetDrawColor(0.33, 0.33, 0.33)
+					graphics:SetDrawColor(0.33, 0.33, 0.33)
 				elseif self.otherDragSource and self.CanDragToValue and self:CanDragToValue(index, value, self.otherDragSource) then
-					SetDrawColor(0, 0.2, 0)
+					graphics:SetDrawColor(0, 0.2, 0)
 				elseif index % 2 == 0 then
-					SetDrawColor(0.05, 0.05, 0.05)
+					graphics:SetDrawColor(0.05, 0.05, 0.05)
 				else
-					SetDrawColor(0, 0, 0)
+					graphics:SetDrawColor(0, 0, 0)
 				end
-				DrawImage(nil, colOffset, lineY + 1, not self.scroll and colWidth - 4 or colWidth, rowHeight - 2)
+				graphics:DrawImage(nil, colOffset, lineY + 1, not self.scroll and colWidth - 4 or colWidth, rowHeight - 2)
 			elseif value == self.selValue or value == ttValue then
 				if self.hasFocus and value == self.selValue then
-					SetDrawColor(1, 1, 1)
+					graphics:SetDrawColor(1, 1, 1)
 				elseif value == ttValue then
-					SetDrawColor(0.8, 0.8, 0.8)
+					graphics:SetDrawColor(0.8, 0.8, 0.8)
 				else
-					SetDrawColor(0.5, 0.5, 0.5)
+					graphics:SetDrawColor(0.5, 0.5, 0.5)
 				end
-				DrawImage(nil, colOffset, lineY, not self.scroll and colWidth - 4 or colWidth, rowHeight)
+				graphics:DrawImage(nil, colOffset, lineY, not self.scroll and colWidth - 4 or colWidth, rowHeight)
 				if self.otherDragSource and self.CanDragToValue and self:CanDragToValue(index, value, self.otherDragSource) then
-					SetDrawColor(0, 0.2, 0)
+					graphics:SetDrawColor(0, 0.2, 0)
 				else
-					SetDrawColor(0.15, 0.15, 0.15)
+					graphics:SetDrawColor(0.15, 0.15, 0.15)
 				end
-				DrawImage(nil, colOffset, lineY + 1, not self.scroll and colWidth - 4 or colWidth, rowHeight - 2)
+				graphics:DrawImage(nil, colOffset, lineY + 1, not self.scroll and colWidth - 4 or colWidth, rowHeight - 2)
 			end
 			if not self.SetHighlightColor or not self:SetHighlightColor(index, value) then
-				SetDrawColor(1, 1, 1)
+				graphics:SetDrawColor(1, 1, 1)
 			end
-			DrawString(colOffset, lineY + textOffsetY, "LEFT", textHeight, colFont, text)
+			graphics:DrawString(colOffset, lineY + textOffsetY, "LEFT", textHeight, colFont, text)
 		end
 		if self.colLabels then
 			local mOver = relX >= colOffset and relX <= colOffset + colWidth and relY >= 0 and relY <= 18
 			if mOver and self:GetColumnProperty(column, "sortable") then
-				SetDrawColor(1, 1, 1)
-				DrawImage(nil, colOffset, 1, colWidth, 18)
-				SetDrawColor(0.33, 0.33, 0.33)
-				DrawImage(nil, colOffset + 1, 2, colWidth - 2, 16)
+				graphics:SetDrawColor(1, 1, 1)
+				graphics:DrawImage(nil, colOffset, 1, colWidth, 18)
+				graphics:SetDrawColor(0.33, 0.33, 0.33)
+				graphics:DrawImage(nil, colOffset + 1, 2, colWidth - 2, 16)
 			else
-				SetDrawColor(0.5, 0.5, 0.5)
-				DrawImage(nil, colOffset, 1, colWidth, 18)
-				SetDrawColor(0.15, 0.15, 0.15)
-				DrawImage(nil, colOffset + 1, 2, colWidth - 2, 16)
+				graphics:SetDrawColor(0.5, 0.5, 0.5)
+				graphics:DrawImage(nil, colOffset, 1, colWidth, 18)
+				graphics:SetDrawColor(0.15, 0.15, 0.15)
+				graphics:DrawImage(nil, colOffset + 1, 2, colWidth - 2, 16)
 			end
 			local label = self:GetColumnProperty(column, "label")
 			if label and #label > 0 then
-				SetDrawColor(1, 1, 1)
-				DrawString(colOffset + colWidth/2, 4, "CENTER_X", 12, "VAR", label)
+				graphics:SetDrawColor(1, 1, 1)
+				graphics:DrawString(colOffset + colWidth/2, 4, "CENTER_X", 12, "VAR", label)
 			end
 		end
 	end
 	if #self.list == 0 and self.defaultText then
-		SetDrawColor(1, 1, 1)
-		DrawString(2, 2, "LEFT", 14, self.font, self.defaultText)
+		graphics:SetDrawColor(1, 1, 1)
+		graphics:DrawString(2, 2, "LEFT", 14, self.font, self.defaultText)
 	end
 	if self.selDragIndex then
 		local lineY = rowHeight * (self.selDragIndex - 1) - scrollOffsetV
-		SetDrawColor(1, 1, 1)
-		DrawImage(nil, 0, lineY - 1, width - 20, 3)
-		SetDrawColor(0, 0, 0)
-		DrawImage(nil, 0, lineY, width - 20, 1)
+		graphics:SetDrawColor(1, 1, 1)
+		graphics:DrawImage(nil, 0, lineY - 1, width - 20, 3)
+		graphics:SetDrawColor(0, 0, 0)
+		graphics:DrawImage(nil, 0, lineY, width - 20, 1)
 	end
-	SetViewport()
+	graphics:SetViewport()
 
 	if self.selDragActive and self.dragTargetList and (not self.isMutable or not self:IsMouseOver()) then
 		main.showDragText = self:GetRowValue(1, self.selIndex, self.selValue)
@@ -305,10 +305,10 @@ function ListClass:Draw(viewPort, noTooltip)
 	self.hoverIndex = ttIndex
 	self.hoverValue = ttValue
 	if ttIndex and self.AddValueTooltip and (not noTooltip or self.forceTooltip) then
-		SetDrawLayer(nil, 100)
+		graphics:SetDrawLayer(nil, 100)
 		self:AddValueTooltip(self.tooltip, ttIndex, ttValue)
 		self.tooltip:Draw(ttX, ttY, ttWidth, rowHeight, viewPort)
-		SetDrawLayer(nil, 0)
+		graphics:SetDrawLayer(nil, 0)
 	end
 end
 
@@ -326,7 +326,7 @@ function ListClass:OnKeyDown(key, doubleClick)
 	if key == "LEFTBUTTON" then
 		local newSelect = nil
 		local x, y = self:GetPos()
-		local cursorX, cursorY = GetCursorPos()
+		local cursorX, cursorY = engine:GetCursorPos()
 		local rowRegion = self:GetRowRegion()
 		if cursorX >= x + rowRegion.x and cursorY >= y + rowRegion.y and cursorX < x + rowRegion.x + rowRegion.width and cursorY < y + rowRegion.y + rowRegion.height then
 			local index = math.floor((cursorY - y - rowRegion.y + self.controls.scrollBarV.offset) / self.rowHeight) + 1
@@ -365,11 +365,11 @@ function ListClass:OnKeyDown(key, doubleClick)
 		elseif key == "END" then
 			self:SelectIndex(#self.list)
 		elseif self.selValue then
-			if key == "c" and IsKeyDown("CTRL") then
+			if key == "c" and engine:IsKeyDown("CTRL") then
 				if self.OnSelCopy then
 					self:OnSelCopy(self.selIndex, self.selValue)
 				end
-			elseif key == "x" and IsKeyDown("CTRL") then
+			elseif key == "x" and engine:IsKeyDown("CTRL") then
 				if self.OnSelCut then
 					self:OnSelCut(self.selIndex, self.selValue)
 				end
@@ -393,13 +393,13 @@ function ListClass:OnKeyUp(key)
 		return
 	end
 	if key == "WHEELDOWN" then
-		if self.scroll and self.scrollH and IsKeyDown("SHIFT") then
+		if self.scroll and self.scrollH and engine:IsKeyDown("SHIFT") then
 			self.controls.scrollBarH:Scroll(1)
 		else
 			self.controls.scrollBarV:Scroll(1)
 		end
 	elseif key == "WHEELUP" then
-		if self.scroll and self.scrollH and IsKeyDown("SHIFT") then
+		if self.scroll and self.scrollH and engine:IsKeyDown("SHIFT") then
 			self.controls.scrollBarH:Scroll(-1)
 		else
 			self.controls.scrollBarV:Scroll(-1)
@@ -443,7 +443,7 @@ end
 
 function ListClass:GetHoverIndex()
 	local x, y = self:GetPos()
-	local cursorX, cursorY = GetCursorPos()
+	local cursorX, cursorY = engine:GetCursorPos()
 	local rowRegion = self:GetRowRegion()
 	if cursorX >= x + rowRegion.x and cursorY >= y + rowRegion.y and cursorX < x + rowRegion.x + rowRegion.width and cursorY < y + rowRegion.y + rowRegion.height then
 		local index = math.floor((cursorY - y - rowRegion.y + self.controls.scrollBarV.offset) / self.rowHeight) + 1

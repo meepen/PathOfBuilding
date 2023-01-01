@@ -138,10 +138,10 @@ end
 
 function BuildListClass:DeleteBuild(build)
 	if build.folderName then
-		if NewFileSearch(build.fullFileName.."/*") or NewFileSearch(build.fullFileName.."/*", true) then
+		if engine:NewFileSearch(build.fullFileName.."/*") or engine:NewFileSearch(build.fullFileName.."/*", true) then
 			main:OpenMessagePopup("Delete Folder", "The folder is not empty.")
 		else
-			local res, msg = RemoveDir(build.fullFileName)
+			local res, msg = engine:RemoveDir(build.fullFileName)
 			if not res then
 				main:OpenMessagePopup("Error", "Couldn't delete '"..build.fullFileName.."': "..msg)
 				return

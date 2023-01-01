@@ -73,7 +73,7 @@ function ScrollBarClass:IsMouseOver()
 	end
 	local x, y = self:GetPos()
 	local width, height = self:GetSize()
-	local cursorX, cursorY = GetCursorPos()
+	local cursorX, cursorY = engine:GetCursorPos()
 	local mOver = cursorX >= x and cursorY >= y and cursorX < x + width and cursorY < y + height
 	local mOverComp
 	if mOver and self.enabled then
@@ -112,11 +112,11 @@ function ScrollBarClass:Draw()
 	local enabled = self:IsEnabled()
 	local mOver, mOverComp = self:IsMouseOver()
 	local dir = self.dir
-	if not IsKeyDown("LEFTBUTTON") then
+	if not engine:IsKeyDown("LEFTBUTTON") then
 		self.dragging = false
 	end
 	if self.dragging then
-		local cursorX, cursorY = GetCursorPos()
+		local cursorX, cursorY = engine:GetCursorPos()
 		if self.dir == "HORIZONTAL" then
 			self:SetOffsetFromKnobPos((cursorX - self.dragCX) + self.dragKnobPos)
 		else
@@ -124,7 +124,7 @@ function ScrollBarClass:Draw()
 		end
 	elseif self.holdComp then
 		if mOverComp == self.holdComp then
-			local now = GetTime()
+			local now = engine:GetTime()
 			if not self.holdRepeating then
 				if now - self.holdTime > 500 then
 					self.holdRepeating = true
@@ -144,39 +144,39 @@ function ScrollBarClass:Draw()
 				end
 			end
 		elseif self.holdRepeating and not self.holdPauseTime then
-			self.holdPauseTime = GetTime()
+			self.holdPauseTime = engine:GetTime()
 		end
 	end
 	-- Draw up/left button background
 	if not enabled then
-		SetDrawColor(0.33, 0.33, 0.33)
+		graphics:SetDrawColor(0.33, 0.33, 0.33)
 	elseif mOverComp == "UP" then
-		SetDrawColor(1, 1, 1)
+		graphics:SetDrawColor(1, 1, 1)
 	else
-		SetDrawColor(0.5, 0.5, 0.5)
+		graphics:SetDrawColor(0.5, 0.5, 0.5)
 	end
 	if dir == "HORIZONTAL" then
-		DrawImage(nil, x, y, height, height)
+		graphics:DrawImage(nil, x, y, height, height)
 	else
-		DrawImage(nil, x, y, width, width)
+		graphics:DrawImage(nil, x, y, width, width)
 	end
 	if enabled and mOverComp == "UP" then
-		SetDrawColor(0.33, 0.33, 0.33)
+		graphics:SetDrawColor(0.33, 0.33, 0.33)
 	else
-		SetDrawColor(0, 0, 0)
+		graphics:SetDrawColor(0, 0, 0)
 	end
 	if dir == "HORIZONTAL" then
-		DrawImage(nil, x + 1, y + 1, height - 2, height - 2)
+		graphics:DrawImage(nil, x + 1, y + 1, height - 2, height - 2)
 	else
-		DrawImage(nil, x + 1, y + 1, width - 2, width - 2)
+		graphics:DrawImage(nil, x + 1, y + 1, width - 2, width - 2)
 	end
 	-- Draw up/left arrow
 	if not enabled then
-		SetDrawColor(0.33, 0.33, 0.33)
+		graphics:SetDrawColor(0.33, 0.33, 0.33)
 	elseif mOverComp == "UP" then
-		SetDrawColor(1, 1, 1)
+		graphics:SetDrawColor(1, 1, 1)
 	else
-		SetDrawColor(0.5, 0.5, 0.5)
+		graphics:SetDrawColor(0.5, 0.5, 0.5)
 	end
 	if dir == "HORIZONTAL" then
 		main:DrawArrow(x + height/2, y + height/2, height/2, height/2, "LEFT")
@@ -185,34 +185,34 @@ function ScrollBarClass:Draw()
 	end
 	-- Draw down/right button background
 	if not enabled then
-		SetDrawColor(0.33, 0.33, 0.33)
+		graphics:SetDrawColor(0.33, 0.33, 0.33)
 	elseif mOverComp == "DOWN" then
-		SetDrawColor(1, 1, 1)
+		graphics:SetDrawColor(1, 1, 1)
 	else
-		SetDrawColor(0.5, 0.5, 0.5)
+		graphics:SetDrawColor(0.5, 0.5, 0.5)
 	end
 	if dir == "HORIZONTAL" then
-		DrawImage(nil, x + width - height, y, height, height)
+		graphics:DrawImage(nil, x + width - height, y, height, height)
 	else
-		DrawImage(nil, x, y + height - width, width, width)
+		graphics:DrawImage(nil, x, y + height - width, width, width)
 	end
 	if enabled and mOverComp == "DOWN" then
-		SetDrawColor(0.33, 0.33, 0.33)
+		graphics:SetDrawColor(0.33, 0.33, 0.33)
 	else
-		SetDrawColor(0, 0, 0)
+		graphics:SetDrawColor(0, 0, 0)
 	end
 	if dir == "HORIZONTAL" then
-		DrawImage(nil, x + width - height + 1, y + 1, height - 2, height - 2)
+		graphics:DrawImage(nil, x + width - height + 1, y + 1, height - 2, height - 2)
 	else
-		DrawImage(nil, x + 1, y + height - width + 1, width - 2, width - 2)
+		graphics:DrawImage(nil, x + 1, y + height - width + 1, width - 2, width - 2)
 	end
 	-- Draw down/right arrow
 	if not enabled then
-		SetDrawColor(0.33, 0.33, 0.33)
+		graphics:SetDrawColor(0.33, 0.33, 0.33)
 	elseif mOverComp == "DOWN" then
-		SetDrawColor(1, 1, 1)
+		graphics:SetDrawColor(1, 1, 1)
 	else
-		SetDrawColor(0.5, 0.5, 0.5)
+		graphics:SetDrawColor(0.5, 0.5, 0.5)
 	end
 	if dir == "HORIZONTAL" then
 		main:DrawArrow(x + width - height/2, y + height/2, height/2, height/2, "RIGHT")
@@ -221,33 +221,33 @@ function ScrollBarClass:Draw()
 	end
 	-- Draw slide background
 	if not enabled then
-		SetDrawColor(0.33, 0.33, 0.33)
+		graphics:SetDrawColor(0.33, 0.33, 0.33)
 	elseif self.dragging or mOverComp == "KNOB" or mOverComp == "SLIDEUP" or mOverComp == "SLIDEDOWN" then
-		SetDrawColor(1, 1, 1)
+		graphics:SetDrawColor(1, 1, 1)
 	else
-		SetDrawColor(0.5, 0.5, 0.5)
+		graphics:SetDrawColor(0.5, 0.5, 0.5)
 	end
 	if dir == "HORIZONTAL" then
-		DrawImage(nil, x + height, y, width - height * 2, height)
-		SetDrawColor(0, 0, 0)
-		DrawImage(nil, x + height, y + 1, width - height * 2, height - 2)
+		graphics:DrawImage(nil, x + height, y, width - height * 2, height)
+		graphics:SetDrawColor(0, 0, 0)
+		graphics:DrawImage(nil, x + height, y + 1, width - height * 2, height - 2)
 	else
-		DrawImage(nil, x, y + width, width, height - width * 2)
-		SetDrawColor(0, 0, 0)
-		DrawImage(nil, x + 1, y + width, width - 2, height - width * 2)
+		graphics:DrawImage(nil, x, y + width, width, height - width * 2)
+		graphics:SetDrawColor(0, 0, 0)
+		graphics:DrawImage(nil, x + 1, y + width, width - 2, height - width * 2)
 	end
 	-- Draw knob
 	if enabled then
 		if self.dragging or mOverComp == "KNOB" then
-			SetDrawColor(1, 1, 1)
+			graphics:SetDrawColor(1, 1, 1)
 		else
-			SetDrawColor(0.5, 0.5, 0.5)
+			graphics:SetDrawColor(0.5, 0.5, 0.5)
 		end
 		local knobPos = self:GetKnobPosForOffset()
 		if dir == "HORIZONTAL" then
-			DrawImage(nil, x + height + knobPos + 1, y + 2, self.knobDim - 2, height - 4)
+			graphics:DrawImage(nil, x + height + knobPos + 1, y + 2, self.knobDim - 2, height - 4)
 		else
-			DrawImage(nil, x + 2, y + width + knobPos + 1, width - 4, self.knobDim - 2)
+			graphics:DrawImage(nil, x + 2, y + width + knobPos + 1, width - 4, self.knobDim - 2)
 		end
 	end
 end
@@ -264,7 +264,7 @@ function ScrollBarClass:OnKeyDown(key)
 		if mOverComp == "KNOB" then
 			if not self.dragging then
 				self.dragging = true
-				local cursorX, cursorY = GetCursorPos()
+				local cursorX, cursorY = engine:GetCursorPos()
 				self.dragCX = cursorX
 				self.dragCY = cursorY
 				self.dragKnobPos = self:GetKnobPosForOffset()
@@ -272,12 +272,12 @@ function ScrollBarClass:OnKeyDown(key)
 		elseif mOverComp == "UP" then
 			self:Scroll(-1)
 			self.holdComp = "UP"
-			self.holdTime = GetTime()
+			self.holdTime = engine:GetTime()
 			self.holdBase = self.offset
 		elseif mOverComp == "DOWN" then
 			self:Scroll(1)
 			self.holdComp = "DOWN"
-			self.holdTime = GetTime()
+			self.holdTime = engine:GetTime()
 			self.holdBase = self.offset
 		elseif mOverComp == "SLIDEUP" then
 			self:SetOffsetFromKnobPos(self:GetKnobPosForOffset() - self.knobDim)
@@ -295,7 +295,7 @@ function ScrollBarClass:OnKeyUp(key)
 	if key == "LEFTBUTTON" then
 		if self.dragging then
 			self.dragging = false
-			local cursorX, cursorY = GetCursorPos()
+			local cursorX, cursorY = engine:GetCursorPos()
 			if self.dir == "HORIZONTAL" then
 				self:SetOffsetFromKnobPos((cursorX - self.dragCX) + self.dragKnobPos)
 			else

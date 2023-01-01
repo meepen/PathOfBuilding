@@ -465,13 +465,13 @@ function SkillsTabClass:Draw(viewPort, inputEvents)
 
 	for id, event in ipairs(inputEvents) do
 		if event.type == "KeyDown" then
-			if event.key == "z" and IsKeyDown("CTRL") then
+			if event.key == "z" and engine:IsKeyDown("CTRL") then
 				self:Undo()
 				self.build.buildFlag = true
-			elseif event.key == "y" and IsKeyDown("CTRL") then
+			elseif event.key == "y" and engine:IsKeyDown("CTRL") then
 				self:Redo()
 				self.build.buildFlag = true
-			elseif event.key == "v" and IsKeyDown("CTRL") then
+			elseif event.key == "v" and engine:IsKeyDown("CTRL") then
 				self:PasteSocketGroup()
 			end
 		end
@@ -521,11 +521,11 @@ function SkillsTabClass:CopySocketGroup(socketGroup)
 	for _, gemInstance in ipairs(socketGroup.gemList) do
 		skillText = skillText .. string.format("%s %d/%d %s %s %d\r\n", gemInstance.nameSpec, gemInstance.level, gemInstance.quality, gemInstance.qualityId, gemInstance.enabled and "" or "DISABLED", gemInstance.count or 1)
 	end
-	Copy(skillText)
+	 engine:Copy(skillText)
 end
 
 function SkillsTabClass:PasteSocketGroup(testInput)
-	local skillText = Paste() or testInput
+	local skillText = engine:Paste() or testInput
 	if skillText then
 		local newGroup = { label = "", enabled = true, gemList = { } }
 		local label = skillText:match("Label: (%C+)")
@@ -912,7 +912,7 @@ function SkillsTabClass:CreateGemSlot(index)
 		return gemInstance and gemInstance.gemData and gemInstance.gemData.vaalGem and gemInstance.gemData.grantedEffectList[1] and not gemInstance.gemData.grantedEffectList[1].support
 	end
 	slot.enableGlobal1.x = function()
-		return self:IsShown() and (DrawStringWidth(16, "VAR", slot.enableGlobal1:GetProperty("label")) + 5) or 0
+		return self:IsShown() and (graphics:DrawStringWidth(16, "VAR", slot.enableGlobal1:GetProperty("label")) + 5) or 0
 	end
 	slot.enableGlobal1.label = function()
 		return "Enable "..self.displayGroup.gemList[index].gemData.grantedEffectList[1].name..":"
@@ -931,7 +931,7 @@ function SkillsTabClass:CreateGemSlot(index)
 		return gemInstance and gemInstance.gemData and gemInstance.gemData.vaalGem and gemInstance.gemData.grantedEffectList[2] and not gemInstance.gemData.grantedEffectList[2].support
 	end
 	slot.enableGlobal2.x = function()
-		return self:IsShown() and (DrawStringWidth(16, "VAR", slot.enableGlobal2:GetProperty("label")) + 12) or 0
+		return self:IsShown() and (graphics:DrawStringWidth(16, "VAR", slot.enableGlobal2:GetProperty("label")) + 12) or 0
 	end
 	slot.enableGlobal2.label = function()
 		return "Enable "..self.displayGroup.gemList[index].gemData.grantedEffectList[2].name..":"

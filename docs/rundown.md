@@ -138,7 +138,7 @@
 * **GameVersions.lua**
     Contains global variables to identify and convert outdated builds. Also contains global table of passive skill tree versions used to upgrade to newer skill tree versions.
 * **HeadlessWrapper.lua**
-    Provides stubs for PoB's graphics host and its environment. Can be used to run PoB from the command line. You would still need to implement at least `Deflate()` and `Inflate()` to import/export builds. Useful for automated testing.
+    Provides stubs for PoB's graphics host and its environment. Can be used to run PoB from the command line. You would still need to implement at least `engine:Deflate()` and `engine:Inflate()` to import/export builds. Useful for automated testing.
 * **Launch.lua**
     Updates on first start, discerns whether PoB is running in dev mode, initialises renderer, loads `Main` module, has callbacks for exiting the program, advancing frames, registering key presses, launching non-blocking subscripts, updating, notification and error prompts.
 * **LaunchInstall.lua**

@@ -29,7 +29,7 @@ if localManXML and localManXML[1].elem == "PoBVersion" then
 	end
 end
 if not localBranch or not localSource then
-	Exit("Install failed. (Missing or invalid manifest)")
+	engine:Exit("Install failed. (Missing or invalid manifest)")
 	return
 end
 localSource = localSource:gsub("{branch}", localBranch)
@@ -45,11 +45,11 @@ for _, name in ipairs(basicFiles) do
 	local size = easy:getinfo(curl.INFO_SIZE_DOWNLOAD)
 	easy:close()
 	if size == 0 then
-		Exit("Install failed. (Couldn't download program files)")
+		engine:Exit("Install failed. (Couldn't download program files)")
 		return
 	end
 	local outFile = io.open(name, "wb")
 	outFile:write(text)
 	outFile:close()
 end
-Restart()
+engine:Restart()

@@ -135,7 +135,7 @@ function ItemListClass:AddValueTooltip(tooltip, index, itemId)
 		return
 	end
 	local item = self.itemsTab.items[itemId]
-	if tooltip:CheckForUpdate(item, IsKeyDown("SHIFT"), launch.devModeAlt, self.itemsTab.build.outputRevision) then
+	if tooltip:CheckForUpdate(item, engine:IsKeyDown("SHIFT"), launch.devModeAlt, self.itemsTab.build.outputRevision) then
 		self.itemsTab:AddItemTooltip(tooltip, item)
 	end
 end
@@ -161,14 +161,14 @@ end
 
 function ItemListClass:OnSelClick(index, itemId, doubleClick)
 	local item = self.itemsTab.items[itemId]
-	if IsKeyDown("CTRL") then
+	if engine:IsKeyDown("CTRL") then
 		local slotName = item:GetPrimarySlot()
 		if slotName and self.itemsTab.slots[slotName] then
 			if self.itemsTab.slots[slotName].weaponSet == 1 and self.itemsTab.activeItemSet.useSecondWeaponSet then
 				-- Redirect to second weapon set
 				slotName = slotName .. " Swap"
 			end
-			if IsKeyDown("SHIFT") then
+			if engine:IsKeyDown("SHIFT") then
 				-- Redirect to second slot if possible
 				local altSlot = slotName:gsub("1","2")
 				if self.itemsTab:IsItemValidForSlot(item, altSlot) then
@@ -193,7 +193,7 @@ end
 
 function ItemListClass:OnSelCopy(index, itemId)
 	local item = self.itemsTab.items[itemId]
-	Copy(item:BuildRaw():gsub("\n", "\r\n"))
+	 engine:Copy(item:BuildRaw():gsub("\n", "\r\n"))
 end
 
 function ItemListClass:OnSelDelete(index, itemId)

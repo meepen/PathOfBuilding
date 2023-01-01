@@ -35,7 +35,7 @@ local recipeNames = {
 -- Preload all recipe images
 local recipeImages = { }
 for _, recipeName in pairs(recipeNames) do
-	recipeImages[recipeName] = NewImageHandle()
+	recipeImages[recipeName] = Image.New()
 	recipeImages[recipeName]:Load("TreeData/" .. recipeName .. ".png", "CLAMP")
 end
 
@@ -111,14 +111,14 @@ function TooltipClass:GetSize()
 			ttH = ttH + data.size + 2
 		end
 		if data.text then
-			ttW = m_max(ttW, DrawStringWidth(data.size, "VAR", data.text))
+			ttW = m_max(ttW, graphics:DrawStringWidth(data.size, "VAR", data.text))
 		end
 	end
 
 	-- Account for recipe display
 	if self.recipe and self.lines[1] then
 		local title = self.lines[1]
-		local imageX = DrawStringWidth(title.size, "VAR", title.text) + title.size
+		local imageX = graphics:DrawStringWidth(title.size, "VAR", title.text) + title.size
 		local recipeTextSize = (title.size * 3) / 4
 		for _, recipeName in ipairs(self.recipe) do
 			-- Trim "Oil" from the recipe name, which normally looks like "GoldenOil"
@@ -126,7 +126,7 @@ function TooltipClass:GetSize()
 			if #recipeNameShort > 3 and recipeNameShort:sub(-3) == "Oil" then
 				recipeNameShort = recipeNameShort:sub(1, #recipeNameShort - 3)
 			end
-			imageX = imageX + DrawStringWidth(recipeTextSize, "VAR", recipeNameShort) + title.size * 1.25
+			imageX = imageX + graphics:DrawStringWidth(recipeTextSize, "VAR", recipeNameShort) + title.size * 1.25
 		end
 		ttW = m_max(ttW, imageX)
 	end
@@ -153,7 +153,7 @@ function TooltipClass:CalculateColumns(ttY, ttX, ttH, ttW, viewPort)
 	for i, data in ipairs(self.lines) do
 		if self.recipe and i == 1 then
 			local title = self.lines[1]
-			local imageX = DrawStringWidth(title.size, "VAR", title.text) + title.size
+			local imageX = graphics:DrawStringWidth(title.size, "VAR", title.text) + title.size
 			local recipeTextSize = (title.size * 3) / 4
 			for _, recipeName in ipairs(self.recipe) do
 				-- Trim "Oil" from the recipe name, which normally looks like "GoldenOil"
@@ -163,7 +163,7 @@ function TooltipClass:CalculateColumns(ttY, ttX, ttH, ttW, viewPort)
 				end
 				-- Draw the name of the recipe component (oil)
 				t_insert(drawStack, {ttX + imageX, y + (title.size - recipeTextSize)/2, "LEFT", recipeTextSize, "VAR", recipeNameShort})
-				imageX = imageX + DrawStringWidth(recipeTextSize, "VAR", recipeNameShort)
+				imageX = imageX + graphics:DrawStringWidth(recipeTextSize, "VAR", recipeNameShort)
 				-- Draw the image of the recipe component (oil)
 				t_insert(drawStack, {recipeImages[recipeName], ttX + imageX, y, title.size, title.size})
 				imageX = imageX + title.size * 1.25
@@ -215,40 +215,40 @@ function TooltipClass:Draw(x, y, w, h, viewPort)
 		ttX = m_floor(x - ttW/2)
 	end
 	
-	SetDrawColor(1, 1, 1)
+	graphics:SetDrawColor(1, 1, 1)
 
 	local columns, maxColumnHeight, drawStack = self:CalculateColumns(ttY, ttX, ttH, ttW, viewPort)
 
 	-- background shading currently must be drawn before text lines.  API change will allow something like the commented lines below
-	SetDrawColor(0, 0, 0, .85)
-	--SetDrawLayer(nil, GetDrawLayer() - 5)
-	DrawImage(nil, ttX, ttY + BORDER_WIDTH, ttW * columns - BORDER_WIDTH, maxColumnHeight - 2 * BORDER_WIDTH)
-	--SetDrawLayer(nil, GetDrawLayer())
-	SetDrawColor(1, 1, 1)
+	graphics:SetDrawColor(0, 0, 0, .85)
+	--graphics:SetDrawLayer(nil, GetDrawLayer() - 5)
+	graphics:DrawImage(nil, ttX, ttY + BORDER_WIDTH, ttW * columns - BORDER_WIDTH, maxColumnHeight - 2 * BORDER_WIDTH)
+	--graphics:SetDrawLayer(nil, GetDrawLayer())
+	graphics:SetDrawColor(1, 1, 1)
 	for i, lines in ipairs(drawStack) do 
 		if #lines < 6 then
 			if(type(self.color) == "string") then
-				SetDrawColor(self.color)
+				graphics:SetDrawColor(self.color)
 			elseif lines[1] then -- Don't color images
-				SetDrawColor(1,1,1)
+				graphics:SetDrawColor(1,1,1)
 			else
-				SetDrawColor(unpack(self.color))
+				graphics:SetDrawColor(unpack(self.color))
 			end
-			DrawImage(unpack(lines))
+			graphics:DrawImage(unpack(lines))
 		else
-			DrawString(unpack(lines))
+			graphics:DrawString(unpack(lines))
 		end
 	end
 	if type(self.color) == "string" then
-		SetDrawColor(self.color) 
+		graphics:SetDrawColor(self.color) 
 	else
-		SetDrawColor(unpack(self.color))
+		graphics:SetDrawColor(unpack(self.color))
 	end
 	for i=0,columns do
-		DrawImage(nil, ttX + ttW * i - BORDER_WIDTH * math.ceil(i^2 / (i^2 + 1)), ttY, BORDER_WIDTH, maxColumnHeight) -- borders
+		graphics:DrawImage(nil, ttX + ttW * i - BORDER_WIDTH * math.ceil(i^2 / (i^2 + 1)), ttY, BORDER_WIDTH, maxColumnHeight) -- borders
 	end
-	DrawImage(nil, ttX, ttY, ttW * columns, BORDER_WIDTH) -- top border
-	DrawImage(nil, ttX, ttY + maxColumnHeight - BORDER_WIDTH, ttW * columns, BORDER_WIDTH) -- bottom border
+	graphics:DrawImage(nil, ttX, ttY, ttW * columns, BORDER_WIDTH) -- top border
+	graphics:DrawImage(nil, ttX, ttY + maxColumnHeight - BORDER_WIDTH, ttW * columns, BORDER_WIDTH) -- bottom border
 
 	return ttW, ttH
 end

@@ -5,9 +5,11 @@
 -- Program entry point; loads and runs the Main module within a protected environment
 --
 
+require("Engine.Init")
+
 APP_NAME = "Path of Building"
 
-SetWindowTitle(APP_NAME)
+engine:SetWindowTitle(APP_NAME)
 ConExecute("set vid_mode 8")
 ConExecute("set vid_resizable 3")
 
@@ -20,7 +22,7 @@ function launch:OnInit()
 	self.versionNumber = "?"
 	self.versionBranch = "?"
 	self.versionPlatform = "?"
-	self.lastUpdateCheck = GetTime()
+	self.lastUpdateCheck = engine:GetTime()
 	self.subScripts = { }
 	local firstRunFile = io.open("first.run", "r")
 	if firstRunFile then
@@ -61,7 +63,7 @@ function launch:OnInit()
 		self.installedMode = true
 		installedFile:close()
 	end
-	RenderInit()
+	graphics:RenderInit()
 	ConPrintf("Loading main script...")
 	local errMsg
 	errMsg, self.main = PLoadModule("Modules/Main")
@@ -110,22 +112,22 @@ function launch:OnFrame()
 			end
 		end
 	end
-	self.devModeAlt = self.devMode and IsKeyDown("ALT")
-	SetDrawLayer(1000)
-	SetViewport()
+	self.devModeAlt = self.devMode and engine:IsKeyDown("ALT")
+	graphics:SetDrawLayer(1000)
+	graphics:SetViewport()
 	if self.promptMsg then
 		local r, g, b = unpack(self.promptCol)
 		self:DrawPopup(r, g, b, "^0%s", self.promptMsg)
 	end
 	if self.doRestart then
-		local screenW, screenH = GetScreenSize()
-		SetDrawColor(0, 0, 0, 0.75)
-		DrawImage(nil, 0, 0, screenW, screenH)
-		SetDrawColor(1, 1, 1)
-		DrawString(0, screenH/2, "CENTER", 24, "FIXED", self.doRestart)
-		Restart()
+		local screenW, screenH = graphics:GetScreenSize()
+		graphics:SetDrawColor(0, 0, 0, 0.75)
+		graphics:DrawImage(nil, 0, 0, screenW, screenH)
+		graphics:SetDrawColor(1, 1, 1)
+		graphics:DrawString(0, screenH/2, "CENTER", 24, "FIXED", self.doRestart)
+		engine:Restart()
 	end
-	if not self.devMode and (GetTime() - self.lastUpdateCheck) > 1000*60*60*12 then
+	if not self.devMode and (engine:GetTime() - self.lastUpdateCheck) > 1000*60*60*12 then
 		-- Do an update check every 12 hours if the user keeps the program open
 		self:CheckForUpdate(true)
 	end
@@ -147,7 +149,7 @@ function launch:OnKeyDown(key, doubleClick)
 			profiler.start()
 			profiling = true
 		end
-	elseif key == "u" and IsKeyDown("CTRL") then
+	elseif key == "u" and engine:IsKeyDown("CTRL") then
 		if not self.devMode then
 			self:CheckForUpdate()
 		end
@@ -311,12 +313,12 @@ function launch:ApplyUpdate(mode)
 	if mode == "basic" then
 		-- Need to revert to the basic environment to fully apply the update
 		LoadModule("UpdateApply", "Update/opFile.txt")
-		SpawnProcess(GetRuntimePath()..'/Update', 'UpdateApply.lua Update/opFileRuntime.txt')
-		Exit()
+		engine:SpawnProcess(engine:GetRuntimePath()..'/Update', 'UpdateApply.lua Update/opFileRuntime.txt')
+		engine:Exit()
 	elseif mode == "normal" then
 		-- Update can be applied while normal environment is running
 		LoadModule("UpdateApply", "Update/opFile.txt")
-		Restart()
+		engine:Restart()
 		self.doRestart = "Updating..."
 	end
 end
@@ -328,7 +330,7 @@ function launch:CheckForUpdate(inBackground)
 	self.updateCheckBackground = inBackground
 	self.updateMsg = "Initialising..."
 	self.updateProgress = "Checking..."
-	self.lastUpdateCheck = GetTime()
+	self.lastUpdateCheck = engine:GetTime()
 	local update = io.open("UpdateCheck.lua", "r")
 	local id = LaunchSubScript(update:read("*a"), "GetScriptPath,GetRuntimePath,GetWorkDir,MakeDir", "ConPrintf,UpdateProgress", self.connectionProtocol, self.proxyURL)
 	if id then
@@ -370,19 +372,19 @@ function launch:RunPromptFunc(key)
 end
 
 function launch:DrawPopup(r, g, b, fmt, ...)
-	local screenW, screenH = GetScreenSize()
-	SetDrawColor(0, 0, 0, 0.5)
-	DrawImage(nil, 0, 0, screenW, screenH)
+	local screenW, screenH = graphics:GetScreenSize()
+	graphics:SetDrawColor(0, 0, 0, 0.5)
+	graphics:DrawImage(nil, 0, 0, screenW, screenH)
 	local txt = string.format(fmt, ...)
-	local w = DrawStringWidth(20, "VAR", txt) + 20
+	local w = graphics:DrawStringWidth(20, "VAR", txt) + 20
 	local h = (#txt:gsub("[^\n]","") + 2) * 20
 	local ox = (screenW - w) / 2
 	local oy = (screenH - h) / 2
-	SetDrawColor(1, 1, 1)
-	DrawImage(nil, ox, oy, w, h)
-	SetDrawColor(r, g, b)
-	DrawImage(nil, ox + 2, oy + 2, w - 4, h - 4)
-	SetDrawColor(1, 1, 1)
-	DrawImage(nil, ox + 4, oy + 4, w - 8, h - 8)
-	DrawString(0, oy + 10, "CENTER", 20, "VAR", txt)
+	graphics:SetDrawColor(1, 1, 1)
+	graphics:DrawImage(nil, ox, oy, w, h)
+	graphics:SetDrawColor(r, g, b)
+	graphics:DrawImage(nil, ox + 2, oy + 2, w - 4, h - 4)
+	graphics:SetDrawColor(1, 1, 1)
+	graphics:DrawImage(nil, ox + 4, oy + 4, w - 8, h - 8)
+	graphics:DrawString(0, oy + 10, "CENTER", 20, "VAR", txt)
 end

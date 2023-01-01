@@ -121,11 +121,11 @@ end
 function ItemSlotClass:Draw(viewPort)
 	local x, y = self:GetPos()
 	local width, height = self:GetSize()
-	DrawString(x + self.labelOffset, y + 2, "RIGHT_X", height - 4, "VAR", "^7"..self.label..":")
+	graphics:DrawString(x + self.labelOffset, y + 2, "RIGHT_X", height - 4, "VAR", "^7"..self.label..":")
 	self.DropDownControl:Draw(viewPort)
 	self:DrawControls(viewPort)
 	if not main.popups[1] and self.nodeId and (self.dropped or (self:IsMouseOver() and (self.otherDragSource or not self.itemsTab.selControl))) then
-		SetDrawLayer(nil, 15)
+		graphics:SetDrawLayer(nil, 15)
 		local viewerY
 		if self.DropDownControl.dropUp and self.DropDownControl.dropped then
 			viewerY = y + 20
@@ -133,22 +133,22 @@ function ItemSlotClass:Draw(viewPort)
 			viewerY = m_min(y - 300 - 5, viewPort.y + viewPort.height - 304)
 		end
 		local viewerX = x
-		SetDrawColor(1, 1, 1)
-		DrawImage(nil, viewerX, viewerY, 304, 304)
+		graphics:SetDrawColor(1, 1, 1)
+		graphics:DrawImage(nil, viewerX, viewerY, 304, 304)
 		local viewer = self.itemsTab.socketViewer
 		local node = self.itemsTab.build.spec.nodes[self.nodeId]
 		viewer.zoom = 5
 		local scale = self.itemsTab.build.spec.tree.size / 1500
 		viewer.zoomX = -node.x / scale
 		viewer.zoomY = -node.y / scale
-		SetViewport(viewerX + 2, viewerY + 2, 300, 300)
+		graphics:SetViewport(viewerX + 2, viewerY + 2, 300, 300)
 		viewer:Draw(self.itemsTab.build, { x = 0, y = 0, width = 300, height = 300 }, { })
-		SetDrawLayer(nil, 30)
-		SetDrawColor(1, 1, 1, 0.2)
-		DrawImage(nil, 149, 0, 2, 300)
-		DrawImage(nil, 0, 149, 300, 2)
-		SetViewport()
-		SetDrawLayer(nil, 0)
+		graphics:SetDrawLayer(nil, 30)
+		graphics:SetDrawColor(1, 1, 1, 0.2)
+		graphics:DrawImage(nil, 149, 0, 2, 300)
+		graphics:DrawImage(nil, 0, 149, 300, 2)
+		graphics:SetViewport()
+		graphics:SetDrawLayer(nil, 0)
 	end
 end
 

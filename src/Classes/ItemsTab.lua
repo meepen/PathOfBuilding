@@ -1056,8 +1056,8 @@ function ItemsTabClass:Draw(viewPort, inputEvents)
 	
 	for id, event in ipairs(inputEvents) do
 		if event.type == "KeyDown" then	
-			if event.key == "v" and IsKeyDown("CTRL") then
-				local newItem = Paste()
+			if event.key == "v" and engine:IsKeyDown("CTRL") then
+				local newItem = engine:Paste()
 				if newItem then
 					self:CreateDisplayItemFromRaw(newItem, true)
 				end
@@ -1067,13 +1067,13 @@ function ItemsTabClass:Draw(viewPort, inputEvents)
 					-- Trigger itemList's double click procedure
 					self.controls.itemList:OnSelClick(0, mOverControl.selItemId, true)
 				end
-			elseif event.key == "z" and IsKeyDown("CTRL") then
+			elseif event.key == "z" and engine:IsKeyDown("CTRL") then
 				self:Undo()
 				self.build.buildFlag = true
-			elseif event.key == "y" and IsKeyDown("CTRL") then
+			elseif event.key == "y" and engine:IsKeyDown("CTRL") then
 				self:Redo()
 				self.build.buildFlag = true
-			elseif event.key == "f" and IsKeyDown("CTRL") then
+			elseif event.key == "f" and engine:IsKeyDown("CTRL") then
 				local selUnique = self.selControl == self.controls.uniqueDB.controls.search
 				local selRare = self.selControl == self.controls.rareDB.controls.search
 				if selUnique or (self.controls.selectDB:IsShown() and not selRare and self.controls.selectDB.selIndex == 2) then
@@ -1192,7 +1192,7 @@ function ItemsTabClass:EquipItemInSet(item, itemSetId)
 		self:AddItem(item, true)
 	end
 	local altSlot = slotName:gsub("1","2")
-	if IsKeyDown("SHIFT") then
+	if engine:IsKeyDown("SHIFT") then
 		-- Redirect to second slot if possible
 		if self:IsItemValidForSlot(item, altSlot, itemSet) then
 			slotName = altSlot
@@ -1669,8 +1669,8 @@ function ItemsTabClass:UpdateCustomControls()
 					end
 					self.controls["displayItemCustomModifier"..i].shown = true
 					local label = itemLib.formatModLine(modLine)
-					if DrawStringCursorIndex(16, "VAR", label, 330, 10) < #label then
-						label = label:sub(1, DrawStringCursorIndex(16, "VAR", label, 310, 10)) .. "..."
+					if graphics:DrawStringCursorIndex(16, "VAR", label, 330, 10) < #label then
+						label = label:sub(1, graphics:DrawStringCursorIndex(16, "VAR", label, 310, 10)) .. "..."
 					end
 					self.controls["displayItemCustomModifier"..i].label = label
 					self.controls["displayItemCustomModifierLabel"..i].label = modLine.crafted and "^7Crafted:" or "^7Custom:"
@@ -2153,7 +2153,7 @@ function ItemsTabClass:AnointDisplayItem(enchantSlot)
 	end
 	local function saveLabelWidth()
 		local label = saveLabel()
-		return DrawStringWidth(16, "VAR", label) + 10
+		return graphics:DrawStringWidth(16, "VAR", label) + 10
 	end
 	local function saveLabelX()
 		local width = saveLabelWidth()
@@ -2849,7 +2849,7 @@ function ItemsTabClass:AddItemTooltip(tooltip, item, slot, dbMode)
 	end
 
 	local base = item.base
-	local slotNum = slot and slot.slotNum or (IsKeyDown("SHIFT") and 2 or 1)
+	local slotNum = slot and slot.slotNum or (engine:IsKeyDown("SHIFT") and 2 or 1)
 	local modList = item.modList or item.slotModList[slotNum]
 	if base.weapon then
 		-- Weapon-specific info

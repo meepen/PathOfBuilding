@@ -5,7 +5,7 @@
 -- Program entry point; loads and runs the Main module within a protected environment
 --
 
-SetWindowTitle("Dat View")
+engine:SetWindowTitle("Dat View")
 ConExecute("set vid_mode 8")
 ConExecute("set vid_resizable 3")
 
@@ -15,7 +15,7 @@ SetMainObject(launch)
 function launch:OnInit()
 	self.devMode = true
 	self.subScripts = { }
-	RenderInit()
+	graphics:RenderInit()
 	ConPrintf("Loading main script...")
 	local errMsg
 	errMsg, self.main = PLoadModule("Main", self)
@@ -59,20 +59,20 @@ function launch:OnFrame()
 			end
 		end
 	end
-	self.devModeAlt = self.devMode and IsKeyDown("ALT")
-	SetDrawLayer(1000)
-	SetViewport()
+	self.devModeAlt = self.devMode and engine:IsKeyDown("ALT")
+	graphics:SetDrawLayer(1000)
+	graphics:SetViewport()
 	if self.promptMsg then
 		local r, g, b = unpack(self.promptCol)
 		self:DrawPopup(r, g, b, "^0%s", self.promptMsg)
 	end
 	if self.doRestart then
-		local screenW, screenH = GetScreenSize()
-		SetDrawColor(0, 0, 0, 0.75)
-		DrawImage(nil, 0, 0, screenW, screenH)
-		SetDrawColor(1, 1, 1)
-		DrawString(0, screenH/2, "CENTER", 24, "FIXED", self.doRestart)
-		Restart()
+		local screenW, screenH = graphics:GetScreenSize()
+		graphics:SetDrawColor(0, 0, 0, 0.75)
+		graphics:DrawImage(nil, 0, 0, screenW, screenH)
+		graphics:SetDrawColor(1, 1, 1)
+		graphics:DrawString(0, screenH/2, "CENTER", 24, "FIXED", self.doRestart)
+		engine:Restart()
 	end
 end
 
@@ -180,19 +180,19 @@ function launch:RunPromptFunc(key)
 end
 
 function launch:DrawPopup(r, g, b, fmt, ...)
-	local screenW, screenH = GetScreenSize()
-	SetDrawColor(0, 0, 0, 0.5)
-	DrawImage(nil, 0, 0, screenW, screenH)
+	local screenW, screenH = graphics:GetScreenSize()
+	graphics:SetDrawColor(0, 0, 0, 0.5)
+	graphics:DrawImage(nil, 0, 0, screenW, screenH)
 	local txt = string.format(fmt, ...)
-	local w = DrawStringWidth(20, "VAR", txt) + 20
+	local w = graphics:DrawStringWidth(20, "VAR", txt) + 20
 	local h = (#txt:gsub("[^\n]","") + 2) * 20
 	local ox = (screenW - w) / 2
 	local oy = (screenH - h) / 2
-	SetDrawColor(1, 1, 1)
-	DrawImage(nil, ox, oy, w, h)
-	SetDrawColor(r, g, b)
-	DrawImage(nil, ox + 2, oy + 2, w - 4, h - 4)
-	SetDrawColor(1, 1, 1)
-	DrawImage(nil, ox + 4, oy + 4, w - 8, h - 8)
-	DrawString(0, oy + 10, "CENTER", 20, "VAR", txt)
+	graphics:SetDrawColor(1, 1, 1)
+	graphics:DrawImage(nil, ox, oy, w, h)
+	graphics:SetDrawColor(r, g, b)
+	graphics:DrawImage(nil, ox + 2, oy + 2, w - 4, h - 4)
+	graphics:SetDrawColor(1, 1, 1)
+	graphics:DrawImage(nil, ox + 4, oy + 4, w - 8, h - 8)
+	graphics:DrawString(0, oy + 10, "CENTER", 20, "VAR", txt)
 end

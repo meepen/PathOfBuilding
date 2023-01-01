@@ -133,7 +133,7 @@ function NotableDBClass:ListBuilder()
 	if self.sortDetail and self.sortDetail.stat then -- stat-based
 		local cache = { }
 		local infinites = { }
-		local start = GetTime()
+		local start = engine:GetTime()
 		local calcFunc = self.itemsTab.build.calcsTab:GetMiscCalculator()
 		local itemType = self.itemsTab.displayItem.base.type
 		local storedGlobalCacheDPSView = GlobalCache.useFullDPS
@@ -151,7 +151,7 @@ function NotableDBClass:ListBuilder()
 					self.sortMaxPower = m_max(self.sortMaxPower, node.measuredPower)
 				end
 			end
-			local now = GetTime()
+			local now = engine:GetTime()
 			if now - start > 50 then
 				self.defaultText = "^7Sorting... ("..m_floor(nodeIndex/#list*100).."%)"
 				coroutine.yield()
@@ -289,5 +289,5 @@ end
 ---@param index number
 ---@param node table
 function NotableDBClass:OnSelCopy(index, node)
-	Copy(item.dn)
+	 engine:Copy(item.dn)
 end

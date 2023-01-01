@@ -23,7 +23,7 @@ end)
 
 function FolderListClass:BuildList()
 	wipeTable(self.list)
-	local handle = NewFileSearch(main.buildPath..self.subPath.."*", true)
+	local handle = engine:NewFileSearch(main.buildPath..self.subPath.."*", true)
 	while handle do
 		local fileName = handle:GetFileName()
 		t_insert(self.list, { 
@@ -53,10 +53,10 @@ function FolderListClass:OnSelClick(index, folder, doubleClick)
 end
 
 function FolderListClass:OnSelDelete(index, folder)
-	if NewFileSearch(folder.fullFileName.."/*") or NewFileSearch(folder.fullFileName.."/*", true) then
+	if engine:NewFileSearch(folder.fullFileName.."/*") or engine:NewFileSearch(folder.fullFileName.."/*", true) then
 		main:OpenMessagePopup("Delete Folder", "The folder is not empty.")
 	else
-		local res, msg = RemoveDir(folder.fullFileName)
+		local res, msg = engine:RemoveDir(folder.fullFileName)
 		if not res then
 			main:OpenMessagePopup("Error", "Couldn't delete '"..folder.fullFileName.."': "..msg)
 			return

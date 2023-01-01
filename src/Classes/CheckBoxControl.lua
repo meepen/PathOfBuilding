@@ -17,12 +17,12 @@ function CheckBoxClass:IsMouseOver()
 	end
 	local x, y = self:GetPos()
 	local width, height = self:GetSize()
-	local cursorX, cursorY = GetCursorPos()
+	local cursorX, cursorY = engine:GetCursorPos()
 
 	-- move x left by label width, increase width by label width
 	local label = self:GetProperty("label")
 	if label then
-		local labelWidth = DrawStringWidth(height - 4, "VAR", label) + 5
+		local labelWidth = graphics:DrawStringWidth(height - 4, "VAR", label) + 5
 		x = x - labelWidth
 		width = width + labelWidth
 	end
@@ -35,46 +35,46 @@ function CheckBoxClass:Draw(viewPort, noTooltip)
 	local enabled = self:IsEnabled()
 	local mOver = self:IsMouseOver()
 	if not enabled then
-		SetDrawColor(0.33, 0.33, 0.33)
+		graphics:SetDrawColor(0.33, 0.33, 0.33)
 	elseif mOver then
-		SetDrawColor(1, 1, 1)
+		graphics:SetDrawColor(1, 1, 1)
 	else
-		SetDrawColor(0.5, 0.5, 0.5)
+		graphics:SetDrawColor(0.5, 0.5, 0.5)
 	end
-	DrawImage(nil, x, y, size, size)
+	graphics:DrawImage(nil, x, y, size, size)
 	if not enabled then
-		SetDrawColor(0, 0, 0)
+		graphics:SetDrawColor(0, 0, 0)
 	elseif self.clicked and mOver then
-		SetDrawColor(0.5, 0.5, 0.5)
+		graphics:SetDrawColor(0.5, 0.5, 0.5)
 	elseif mOver then
-		SetDrawColor(0.33, 0.33, 0.33)
+		graphics:SetDrawColor(0.33, 0.33, 0.33)
 	else
-		SetDrawColor(0, 0, 0)
+		graphics:SetDrawColor(0, 0, 0)
 	end
-	DrawImage(nil, x + 1, y + 1, size - 2, size - 2)
+	graphics:DrawImage(nil, x + 1, y + 1, size - 2, size - 2)
 	if self.state then
 		if not enabled then
-			SetDrawColor(0.33, 0.33, 0.33)
+			graphics:SetDrawColor(0.33, 0.33, 0.33)
 		elseif mOver then
-			SetDrawColor(1, 1, 1)
+			graphics:SetDrawColor(1, 1, 1)
 		else
-			SetDrawColor(0.75, 0.75, 0.75)
+			graphics:SetDrawColor(0.75, 0.75, 0.75)
 		end
 		main:DrawCheckMark(x + size/2, y + size/2, size * 0.8)
 	end
 	if enabled then
-		SetDrawColor(1, 1, 1)
+		graphics:SetDrawColor(1, 1, 1)
 	else
-		SetDrawColor(0.33, 0.33, 0.33)
+		graphics:SetDrawColor(0.33, 0.33, 0.33)
 	end
 	local label = self:GetProperty("label")
 	if label then
-		DrawString(x - 5, y + 2, "RIGHT_X", size - 4, "VAR", label)
+		graphics:DrawString(x - 5, y + 2, "RIGHT_X", size - 4, "VAR", label)
 	end
 	if mOver and not noTooltip then
-		SetDrawLayer(nil, 100)
+		graphics:SetDrawLayer(nil, 100)
 		self:DrawTooltip(x, y, size, size, viewPort, self.state)
-		SetDrawLayer(nil, 0)
+		graphics:SetDrawLayer(nil, 0)
 	end
 end
 

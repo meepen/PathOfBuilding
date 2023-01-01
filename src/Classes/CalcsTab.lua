@@ -306,10 +306,10 @@ function CalcsTabClass:Draw(viewPort, inputEvents)
 
 	for id, event in ipairs(inputEvents) do
 		if event.type == "KeyDown" then
-			if event.key == "z" and IsKeyDown("CTRL") then
+			if event.key == "z" and engine:IsKeyDown("CTRL") then
 				self:Undo()
 				self.build.buildFlag = true
-			elseif event.key == "y" and IsKeyDown("CTRL") then
+			elseif event.key == "y" and engine:IsKeyDown("CTRL") then
 				self:Redo()
 				self.build.buildFlag = true
 			end
@@ -409,13 +409,13 @@ function CalcsTabClass:BuildOutput()
 	self.powerBuildFlag = true
 
 	--[[
-	local start = GetTime()
+	local start = engine:GetTime()
 	SetProfiling(true)
 	for i = 1, 1000  do
 		self.calcs.buildOutput(self.build, "MAIN")
 	end
 	SetProfiling(false)
-	ConPrintf("Calc time: %d ms", GetTime() - start)
+	ConPrintf("Calc time: %d ms", engine:GetTime() - start)
 	--]]
 
 	for _, node in pairs(self.build.spec.nodes) do
@@ -461,7 +461,7 @@ end
 
 -- Estimate the offensive and defensive power of all unallocated nodes
 function CalcsTabClass:PowerBuilder()
-	--local timer_start = GetTime()
+	--local timer_start = engine:GetTime()
 	GlobalCache.useFullDPS = self.powerStat and self.powerStat.stat == "FullDPS" or false
 	local calcFunc, calcBase = self:GetMiscCalculator()
 	local cache = { }
@@ -478,7 +478,7 @@ function CalcsTabClass:PowerBuilder()
 	if coroutine.running() then
 		coroutine.yield()
 	end
-	local start = GetTime()
+	local start = engine:GetTime()
 	for nodeId, node in pairs(self.build.spec.nodes) do
 		wipeTable(node.power)
 		if not node.alloc and node.modKey ~= "" and not self.mainEnv.grantedPassives[nodeId] then
@@ -535,9 +535,9 @@ function CalcsTabClass:PowerBuilder()
 				end
 			end
 		end
-		if coroutine.running() and GetTime() - start > 100 then
+		if coroutine.running() and engine:GetTime() - start > 100 then
 			coroutine.yield()
-			start = GetTime()
+			start = engine:GetTime()
 		end
 	end
 
@@ -557,14 +557,14 @@ function CalcsTabClass:PowerBuilder()
 				node.power.singleStat = self:CalculatePowerStat(self.powerStat, output, calcBase)
 			end
 		end
-		if coroutine.running() and GetTime() - start > 100 then
+		if coroutine.running() and engine:GetTime() - start > 100 then
 			coroutine.yield()
-			start = GetTime()
+			start = engine:GetTime()
 		end
 	end
 	self.powerMax = newPowerMax
 	self.powerBuilderInitialized = true
-	--ConPrintf("Power Build time: %d ms", GetTime() - timer_start)
+	--ConPrintf("Power Build time: %d ms", engine:GetTime() - timer_start)
 end
 
 function CalcsTabClass:CalculatePowerStat(selection, original, modified)

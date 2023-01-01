@@ -7,11 +7,11 @@ local LabelClass = newClass("LabelControl", "Control", function(self, anchor, x,
 	self.Control(anchor, x, y, width, height)
 	self.label = label
 	self.width = function()
-		return DrawStringWidth(self:GetProperty("height"), "VAR", self:GetProperty("label"))
+		return graphics:DrawStringWidth(self:GetProperty("height"), "VAR", self:GetProperty("label"))
 	end
 end)
 
 function LabelClass:Draw()
 	local x, y = self:GetPos()
-	DrawString(x, y, "LEFT", self:GetProperty("height"), "VAR", self:GetProperty("label"))
+	graphics:DrawString(x, y, "LEFT", self:GetProperty("height"), "VAR", self:GetProperty("label"))
 end

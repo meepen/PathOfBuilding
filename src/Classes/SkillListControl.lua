@@ -149,7 +149,7 @@ function SkillListClass:OnHoverKeyUp(key)
 				itemLib.wiki.openGem(gem.gemData)
 			end
 		elseif key == "RIGHTBUTTON" then
-			if IsKeyDown("CTRL") then
+			if engine:IsKeyDown("CTRL") then
 				item.includeInFullDPS = not item.includeInFullDPS
 				self.skillsTab:AddUndoState()
 				self.skillsTab.build.buildFlag = true
@@ -161,7 +161,7 @@ function SkillListClass:OnHoverKeyUp(key)
 					self.skillsTab.build.buildFlag = true
 				end
 			end
-		elseif key == "LEFTBUTTON" and IsKeyDown("CTRL") then
+		elseif key == "LEFTBUTTON" and engine:IsKeyDown("CTRL") then
 			item.enabled = not item.enabled
 			self.skillsTab:AddUndoState()
 			self.skillsTab.build.buildFlag = true

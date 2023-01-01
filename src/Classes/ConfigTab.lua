@@ -237,7 +237,7 @@ local ConfigTabClass = newClass("ConfigTab", "UndoHandler", "ControlHost", "Cont
 				control.tooltipFunc = varData.tooltipFunc
 			end
 			if varData.label and varData.type ~= "check" then
-				t_insert(self.controls, new("LabelControl", {"RIGHT",control,"LEFT"}, -4, 0, 0, DrawStringWidth(14, "VAR", varData.label) > 228 and 12 or 14, "^7"..varData.label))
+				t_insert(self.controls, new("LabelControl", {"RIGHT",control,"LEFT"}, -4, 0, 0, graphics:DrawStringWidth(14, "VAR", varData.label) > 228 and 12 or 14, "^7"..varData.label))
 			end
 			if varData.var then
 				self.input[varData.var] = varData.defaultState
@@ -405,10 +405,10 @@ function ConfigTabClass:Draw(viewPort, inputEvents)
 
 	for id, event in ipairs(inputEvents) do
 		if event.type == "KeyDown" then	
-			if event.key == "z" and IsKeyDown("CTRL") then
+			if event.key == "z" and engine:IsKeyDown("CTRL") then
 				self:Undo()
 				self.build.buildFlag = true
-			elseif event.key == "y" and IsKeyDown("CTRL") then
+			elseif event.key == "y" and engine:IsKeyDown("CTRL") then
 				self:Redo()
 				self.build.buildFlag = true
 			end

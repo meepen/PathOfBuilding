@@ -87,7 +87,7 @@ end
 function listMode:OnFrame(inputEvents)
 	for id, event in ipairs(inputEvents) do
 		if event.type == "KeyDown" then	
-			if event.key == "v" and IsKeyDown("CTRL") then
+			if event.key == "v" and engine:IsKeyDown("CTRL") then
 				if self.controls.buildList.copyBuild then
 					local build = self.controls.buildList.copyBuild
 					if build.subPath ~= self.subPath then
@@ -113,7 +113,7 @@ function listMode:OnFrame(inputEvents)
 					end
 					self.controls.buildList.cutBuild = nil
 				end
-			elseif event.key == "n" and IsKeyDown("CTRL") then
+			elseif event.key == "n" and engine:IsKeyDown("CTRL") then
 				main:SetMode("BUILD", false, "Unnamed build")
 			elseif event.key == "MOUSE4" then
 				self.controls.buildList.controls.path:Undo()
@@ -149,9 +149,9 @@ function listMode:BuildList()
 	local filterList = main.filterBuildList or ""
 	local handle = nil
 	if filterList ~= "" then
-		handle = NewFileSearch(main.buildPath..self.subPath.."*"..filterList.."*.xml")
+		handle = engine:NewFileSearch(main.buildPath..self.subPath.."*"..filterList.."*.xml")
 	else
-		handle = NewFileSearch(main.buildPath..self.subPath.."*.xml")
+		handle = engine:NewFileSearch(main.buildPath..self.subPath.."*.xml")
 	end
 	while handle do
 		local fileName = handle:GetFileName()
@@ -180,7 +180,7 @@ function listMode:BuildList()
 			break
 		end
 	end
-	handle = NewFileSearch(main.buildPath..self.subPath.."*", true)
+	handle = engine:NewFileSearch(main.buildPath..self.subPath.."*", true)
 	while handle do
 		local folderName = handle:GetFileName()
 		t_insert(self.list, { 

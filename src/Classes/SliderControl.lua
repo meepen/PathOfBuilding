@@ -22,7 +22,7 @@ function SliderClass:IsMouseOver()
 	end
 	local x, y = self:GetPos()
 	local width, height = self:GetSize()
-	local cursorX, cursorY = GetCursorPos()
+	local cursorX, cursorY = engine:GetCursorPos()
 	local mOver = cursorX >= x and cursorY >= y and cursorX < x + width and cursorY < y + height
 	local mOverComp
 	if mOver then
@@ -76,35 +76,35 @@ function SliderClass:Draw(viewPort)
 	local width, height = self:GetSize()
 	local enabled = self:IsEnabled()
 	local knobTravel = self:GetKnobTravel()
-	if self.dragging and not IsKeyDown("LEFTBUTTON") then
+	if self.dragging and not engine:IsKeyDown("LEFTBUTTON") then
 		self.dragging = false
 	end
 	if self.dragging then
-		local cursorX, cursorY = GetCursorPos()
+		local cursorX, cursorY = engine:GetCursorPos()
 		self:SetValFromKnobX((cursorX - self.dragCX) + self.dragKnobX)
 	end
 	local mOver, mOverComp = self:IsMouseOver()
 	if not enabled then
-		SetDrawColor(0.33, 0.33, 0.33)
+		graphics:SetDrawColor(0.33, 0.33, 0.33)
 	elseif self.dragging or mOver then
-		SetDrawColor(1, 1, 1)
+		graphics:SetDrawColor(1, 1, 1)
 	else
-		SetDrawColor(0.5, 0.5, 0.5)
+		graphics:SetDrawColor(0.5, 0.5, 0.5)
 	end
-	DrawImage(nil, x, y, width, height)
-	SetDrawColor(0, 0, 0)
-	DrawImage(nil, x + 1, y + 1, width - 2, height - 2)
+	graphics:DrawImage(nil, x, y, width, height)
+	graphics:SetDrawColor(0, 0, 0)
+	graphics:DrawImage(nil, x + 1, y + 1, width - 2, height - 2)
 	if enabled then
 		if self.divCount then
-			SetDrawColor(0.33, 0.33, 0.33)
+			graphics:SetDrawColor(0.33, 0.33, 0.33)
 			for d = 0, knobTravel + 0.5, knobTravel / self.divCount do
-				DrawImage(nil, x + self.knobSize/2 + d, y + 1, 2, height - 2)
+				graphics:DrawImage(nil, x + self.knobSize/2 + d, y + 1, 2, height - 2)
 			end
 		end
 		if self.dragging or mOverComp == "KNOB" then
-			SetDrawColor(1, 1, 1)
+			graphics:SetDrawColor(1, 1, 1)
 		else
-			SetDrawColor(0.5, 0.5, 0.5)
+			graphics:SetDrawColor(0.5, 0.5, 0.5)
 		end
 		local knobX = self:GetKnobXForVal()
 		if self.divCount then
@@ -112,19 +112,19 @@ function SliderClass:Draw(viewPort)
 			main:DrawArrow(x + 1 + knobX + self.knobSize/2, y + height/2 - arrowHeight/2, self.knobSize, arrowHeight, "UP")
 			main:DrawArrow(x + 1 + knobX + self.knobSize/2, y + height/2 + arrowHeight/2, self.knobSize, arrowHeight, "DOWN")
 		else
-			DrawImage(nil, x + 2 + knobX, y + 2, self.knobSize - 2, self.knobSize - 2)
+			graphics:DrawImage(nil, x + 2 + knobX, y + 2, self.knobSize - 2, self.knobSize - 2)
 		end
 	end
 	if enabled and (mOver or self.dragging) then
-		SetDrawLayer(nil, 100)
+		graphics:SetDrawLayer(nil, 100)
 		if self.dragging then
 			self:DrawTooltip(x, y, width, height, viewPort, self.val)
 		else
-			local cursorX, cursorY = GetCursorPos()
+			local cursorX, cursorY = engine:GetCursorPos()
 			local val = (cursorX - x - 1 - self.knobSize / 2) / knobTravel
 			self:DrawTooltip(x, y, width, height, viewPort, m_max(0, m_min(1, val)))
 		end
-		SetDrawLayer(nil, 0)
+		graphics:SetDrawLayer(nil, 0)
 	end
 end
 
@@ -139,7 +139,7 @@ function SliderClass:OnKeyDown(key)
 		end
 		if not self.dragging then
 			self.dragging = true
-			local cursorX, cursorY = GetCursorPos()
+			local cursorX, cursorY = engine:GetCursorPos()
 			self.dragCX = cursorX
 			if mOverComp == "SLIDE" then
 				local x, y = self:GetPos()
@@ -158,21 +158,21 @@ function SliderClass:OnKeyUp(key)
 	if key == "LEFTBUTTON" then
 		if self.dragging then
 			self.dragging = false
-			local cursorX, cursorY = GetCursorPos()
+			local cursorX, cursorY = engine:GetCursorPos()
 			self:SetValFromKnobX((cursorX - self.dragCX) + self.dragKnobX)
 		end
 	elseif (not main.invertSliderScrollDirection and key == "WHEELDOWN") or (main.invertSliderScrollDirection and  key == "WHEELUP") or key == "DOWN" or key == "LEFT" then
-		if IsKeyDown("SHIFT") then
+		if engine:IsKeyDown("SHIFT") then
 			self:SetVal(self.val - self.scrollWheelSpeedTbl["SHIFT"])
-		elseif IsKeyDown("CTRL") then
+		elseif engine:IsKeyDown("CTRL") then
 			self:SetVal(self.val - self.scrollWheelSpeedTbl["CTRL"])
 		else
 			self:SetVal(self.val - self.scrollWheelSpeedTbl["DEFAULT"])
 		end
 	elseif (not main.invertSliderScrollDirection and key == "WHEELUP") or (main.invertSliderScrollDirection and key == "WHEELDOWN") or key == "UP" or key == "RIGHT" then
-		if IsKeyDown("SHIFT") then
+		if engine:IsKeyDown("SHIFT") then
 			self:SetVal(self.val + self.scrollWheelSpeedTbl["SHIFT"])
-		elseif IsKeyDown("CTRL") then
+		elseif engine:IsKeyDown("CTRL") then
 			self:SetVal(self.val + self.scrollWheelSpeedTbl["CTRL"])
 		else
 			self:SetVal(self.val + self.scrollWheelSpeedTbl["DEFAULT"])

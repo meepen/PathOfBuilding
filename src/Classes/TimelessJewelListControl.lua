@@ -30,9 +30,9 @@ function TimelessJewelListControlClass:SetHighlightColor(index, value)
 
 	if isHighlighted then
 		if self.selIndex == index or self.highlightIndex == index then
-			SetDrawColor(1, 0.5, 0)
+			graphics:SetDrawColor(1, 0.5, 0)
 		else
-			SetDrawColor(1, 1, 0)
+			graphics:SetDrawColor(1, 1, 0)
 		end
 
 		return true
@@ -42,7 +42,7 @@ function TimelessJewelListControlClass:SetHighlightColor(index, value)
 end
 
 function TimelessJewelListControlClass:OverrideSelectIndex(index)
-	if IsKeyDown("SHIFT") and self.selIndex then
+	if engine:IsKeyDown("SHIFT") and self.selIndex then
 		self.highlightIndex = index
 		return true
 	else

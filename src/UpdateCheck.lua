@@ -78,8 +78,8 @@ end
 
 ConPrintf("Checking for update...")
 
-local scriptPath = GetScriptPath()
-local runtimePath = GetRuntimePath()
+local scriptPath = engine:GetScriptPath()
+local runtimePath = engine:GetRuntimePath()
 
 -- Load and process local manifest
 local localVer
@@ -196,7 +196,7 @@ if #updateFiles == 0 and #deleteFiles == 0 then
 	return "none"
 end
 
-MakeDir("Update")
+engine:MakeDir("Update")
 ConPrintf("Downloading update...")
 
 -- Download changelog
@@ -284,7 +284,7 @@ for _, data in pairs(updateFiles) do
 	local dirStr = ""
 	for dir in data.fullPath:gmatch("([^/]+/)") do
 		dirStr = dirStr .. dir
-		MakeDir(dirStr)
+		engine:MakeDir(dirStr)
 	end
 	if data.part == "runtime" then
 		-- Core runtime file, will need to update from the basic environment

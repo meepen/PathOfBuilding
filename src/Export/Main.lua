@@ -83,7 +83,7 @@ function main:Init()
 	end
 
 	self.scriptList = { }
-	local handle = NewFileSearch("Scripts/*.lua")
+	local handle = engine:NewFileSearch("Scripts/*.lua")
 	while handle do
 		t_insert(self.scriptList, (handle:GetFileName():gsub("%.lua","")))
 		if not handle:NextFile() then
@@ -308,7 +308,7 @@ function main:Shutdown()
 end
 
 function main:OnFrame()
-	self.screenW, self.screenH = GetScreenSize()
+	self.screenW, self.screenH = graphics:GetScreenSize()
 
 	self.viewPort = { x = 0, y = 0, width = self.screenW, height = self.screenH }
 
@@ -321,11 +321,11 @@ function main:OnFrame()
 
 	self:DrawControls(self.viewPort)
 	if self.popups[1] then
-		SetDrawLayer(10)
-		SetDrawColor(0, 0, 0, 0.5)
-		DrawImage(nil, 0, 0, self.screenW, self.screenH)
+		graphics:SetDrawLayer(10)
+		graphics:SetDrawColor(0, 0, 0, 0.5)
+		graphics:DrawImage(nil, 0, 0, self.screenW, self.screenH)
 		self.popups[1]:Draw(self.viewPort)
-		SetDrawLayer(0)
+		graphics:SetDrawLayer(0)
 	end
 
 	wipeTable(self.inputEvents)
@@ -352,44 +352,44 @@ function main:InitGGPK()
 	if not self.datSource then
 		return
 	else
-		local now = GetTime()
+		local now = engine:GetTime()
 		local ggpkPath = self.datSource.ggpkPath or self.datSource.path
 		if ggpkPath and (ggpkPath:match("%.ggpk") or ggpkPath:match("steamapps[/\\].+[/\\]Path of Exile")) then
 			self.ggpk = new("GGPKData", ggpkPath)
-			ConPrintf("GGPK: %d ms", GetTime() - now)
+			ConPrintf("GGPK: %d ms", engine:GetTime() - now)
 		elseif self.datSource.datFilePath then
 			self.ggpk = new("GGPKData", nil, self.datSource.datFilePath)
-			ConPrintf("GGPK: %d ms", GetTime() - now)
+			ConPrintf("GGPK: %d ms", engine:GetTime() - now)
 		end
 	end
 end
 
 function main:LoadDatFiles()
-	local now = GetTime()
+	local now = engine:GetTime()
 	for i, record in ipairs(self.ggpk.dat) do
 		if i == 1 then
-			ConPrintf("DAT find: %d ms", GetTime() - now)
-			now = GetTime()
+			ConPrintf("DAT find: %d ms", engine:GetTime() - now)
+			now = engine:GetTime()
 		end
 		local datFile = new("DatFile", record.name:gsub("%.dat$",""), record.data)
 		t_insert(self.datFileList, datFile)
 		self.datFileByName[datFile.name] = datFile
 	end
-	ConPrintf("DAT read: %d ms", GetTime() - now)
+	ConPrintf("DAT read: %d ms", engine:GetTime() - now)
 end
 
 function main:LoadDat64Files()
-	local now = GetTime()
+	local now = engine:GetTime()
 	for i, record in ipairs(self.ggpk.dat) do
 		if i == 1 then
-			ConPrintf("DAT64 find: %d ms", GetTime() - now)
-			now = GetTime()
+			ConPrintf("DAT64 find: %d ms", engine:GetTime() - now)
+			now = engine:GetTime()
 		end
 		local datFile = new("Dat64File", record.name:gsub("%.dat64$",""), record.data)
 		t_insert(self.datFileList, datFile)
 		self.datFileByName[datFile.name] = datFile
 	end
-	ConPrintf("DAT64 read: %d ms", GetTime() - now)
+	ConPrintf("DAT64 read: %d ms", engine:GetTime() - now)
 end
 
 function main:SetCurrentDat(datFile)
@@ -495,13 +495,13 @@ function main:DrawArrow(x, y, width, height, dir)
 	local y2 = y + height / 2
 	local yMid = (y1 + y2) / 2
 	if dir == "UP" then
-		DrawImageQuad(nil, xMid, y1, xMid, y1, x2, y2, x1, y2)
+		graphics:DrawImageQuad(nil, xMid, y1, xMid, y1, x2, y2, x1, y2)
 	elseif dir == "RIGHT" then
-		DrawImageQuad(nil, x1, y1, x2, yMid, x2, yMid, x1, y2)
+		graphics:DrawImageQuad(nil, x1, y1, x2, yMid, x2, yMid, x1, y2)
 	elseif dir == "DOWN" then
-		DrawImageQuad(nil, x1, y1, x2, y1, xMid, y2, xMid, y2)
+		graphics:DrawImageQuad(nil, x1, y1, x2, y1, xMid, y2, xMid, y2)
 	elseif dir == "LEFT" then
-		DrawImageQuad(nil, x1, yMid, x2, y1, x2, y2, x1, yMid)
+		graphics:DrawImageQuad(nil, x1, yMid, x2, y1, x2, y2, x1, yMid)
 	end
 end
 
@@ -509,8 +509,8 @@ function main:DrawCheckMark(x, y, size)
 	size = size / 0.8
 	x = x - size / 2
 	y = y - size / 2
-	DrawImageQuad(nil, x + size * 0.15, y + size * 0.50, x + size * 0.30, y + size * 0.45, x + size * 0.50, y + size * 0.80, x + size * 0.40, y + size * 0.90)
-	DrawImageQuad(nil, x + size * 0.40, y + size * 0.90, x + size * 0.35, y + size * 0.75, x + size * 0.80, y + size * 0.10, x + size * 0.90, y + size * 0.20)
+	graphics:DrawImageQuad(nil, x + size * 0.15, y + size * 0.50, x + size * 0.30, y + size * 0.45, x + size * 0.50, y + size * 0.80, x + size * 0.40, y + size * 0.90)
+	graphics:DrawImageQuad(nil, x + size * 0.40, y + size * 0.90, x + size * 0.35, y + size * 0.75, x + size * 0.80, y + size * 0.10, x + size * 0.90, y + size * 0.20)
 end
 
 do
@@ -547,7 +547,7 @@ function main:RenderCircle(x, y, width, height, oX, oY, radius)
 	end
 	for ly = minY, maxY do
 		if minX[ly] then
-			DrawImage(nil, x + minX[ly], y + ly, maxX[ly] - minX[ly] + 1, 1)
+			graphics:DrawImage(nil, x + minX[ly], y + ly, maxX[ly] - minX[ly] + 1, 1)
 		end
 	end
 end
@@ -558,7 +558,7 @@ function main:RenderRing(x, y, width, height, oX, oY, radius, size)
 		local r = d / 180 * m_pi
 		local px, py = main:WorldToScreen(oX + m_sin(r) * radius, oY + m_cos(r) * radius, 0, width, height)
 		if px >= -size/2 and px < width + size/2 and py >= -size/2 and py < height + size/2 and (px ~= lastX or py ~= lastY) then
-			DrawImage(nil, x + px - size/2, y + py, size, size)
+			graphics:DrawImage(nil, x + px - size/2, y + py, size, size)
 			lastX, lastY = px, py
 		end
 	end
@@ -566,14 +566,14 @@ end
 
 function main:MoveFolder(name, srcPath, dstPath)
 	-- Create destination folder
-	local res, msg = MakeDir(dstPath..name)
+	local res, msg = engine:MakeDir(dstPath..name)
 	if not res then
 		self:OpenMessagePopup("Error", "Couldn't move '"..name.."' to '"..dstPath.."' : "..msg)
 		return
 	end
 
 	-- Move subfolders
-	local handle = NewFileSearch(srcPath..name.."/*", true)
+	local handle = engine:NewFileSearch(srcPath..name.."/*", true)
 	while handle do
 		self:MoveFolder(handle:GetFileName(), srcPath..name.."/", dstPath..name.."/")
 		if not handle:NextFile() then
@@ -582,7 +582,7 @@ function main:MoveFolder(name, srcPath, dstPath)
 	end
 
 	-- Move files
-	handle = NewFileSearch(srcPath..name.."/*") 
+	handle = engine:NewFileSearch(srcPath..name.."/*") 
 	while handle do
 		local fileName = handle:GetFileName()
 		local srcName = srcPath..name.."/"..fileName
@@ -598,7 +598,7 @@ function main:MoveFolder(name, srcPath, dstPath)
 	end
 
 	-- Remove source folder
-	local res, msg = RemoveDir(srcPath..name)
+	local res, msg = engine:RemoveDir(srcPath..name)
 	if not res then
 		self:OpenMessagePopup("Error", "Couldn't delete '"..dstPath..name.."' : "..msg)
 		return
@@ -607,14 +607,14 @@ end
 
 function main:CopyFolder(srcName, dstName)
 	-- Create destination folder
-	local res, msg = MakeDir(dstName)
+	local res, msg = engine:MakeDir(dstName)
 	if not res then
 		self:OpenMessagePopup("Error", "Couldn't copy '"..srcName.."' to '"..dstName.."' : "..msg)
 		return
 	end
 
 	-- Copy subfolders
-	local handle = NewFileSearch(srcName.."/*", true)
+	local handle = engine:NewFileSearch(srcName.."/*", true)
 	while handle do
 		local fileName = handle:GetFileName()
 		self:CopyFolder(srcName.."/"..fileName, dstName.."/"..fileName)
@@ -624,7 +624,7 @@ function main:CopyFolder(srcName, dstName)
 	end
 
 	-- Copy files
-	handle = NewFileSearch(srcName.."/*") 
+	handle = engine:NewFileSearch(srcName.."/*") 
 	while handle do
 		local fileName = handle:GetFileName()
 		local srcName = srcName.."/"..fileName
@@ -660,7 +660,7 @@ function main:OpenMessagePopup(title, msg)
 	controls.close = new("ButtonControl", nil, 0, 40 + numMsgLines * 16, 80, 20, "Ok", function()
 		main:ClosePopup()
 	end)
-	return self:OpenPopup(m_max(DrawStringWidth(16, "VAR", msg) + 30, 190), 70 + numMsgLines * 16, title, controls, "close")
+	return self:OpenPopup(m_max(graphics:DrawStringWidth(16, "VAR", msg) + 30, 190), 70 + numMsgLines * 16, title, controls, "close")
 end
 
 function main:OpenConfirmPopup(title, msg, confirmLabel, onConfirm)
@@ -670,7 +670,7 @@ function main:OpenConfirmPopup(title, msg, confirmLabel, onConfirm)
 		t_insert(controls, new("LabelControl", nil, 0, 20 + numMsgLines * 16, 0, 16, line))
 		numMsgLines = numMsgLines + 1
 	end
-	local confirmWidth = m_max(80, DrawStringWidth(16, "VAR", confirmLabel) + 10)
+	local confirmWidth = m_max(80, graphics:DrawStringWidth(16, "VAR", confirmLabel) + 10)
 	controls.confirm = new("ButtonControl", nil, -5 - m_ceil(confirmWidth/2), 40 + numMsgLines * 16, confirmWidth, 20, confirmLabel, function()
 		main:ClosePopup()
 		onConfirm()
@@ -678,7 +678,7 @@ function main:OpenConfirmPopup(title, msg, confirmLabel, onConfirm)
 	t_insert(controls, new("ButtonControl", nil, 5 + m_ceil(confirmWidth/2), 40 + numMsgLines * 16, confirmWidth, 20, "Cancel", function()
 		main:ClosePopup()
 	end))
-	return self:OpenPopup(m_max(DrawStringWidth(16, "VAR", msg) + 30, 190), 70 + numMsgLines * 16, title, controls, "confirm")
+	return self:OpenPopup(m_max(graphics:DrawStringWidth(16, "VAR", msg) + 30, 190), 70 + numMsgLines * 16, title, controls, "confirm")
 end
 
 function main:OpenNewFolderPopup(path, onClose)
@@ -689,7 +689,7 @@ function main:OpenNewFolderPopup(path, onClose)
 	end)
 	controls.create = new("ButtonControl", nil, -45, 70, 80, 20, "Create", function()
 		local newFolderName = controls.edit.buf
-		local res, msg = MakeDir(path..newFolderName)
+		local res, msg = engine:MakeDir(path..newFolderName)
 		if not res then
 			main:OpenMessagePopup("Error", "Couldn't create '"..newFolderName.."': "..msg)
 			return
@@ -721,7 +721,7 @@ do
 				s = #str + 1
 				e = #str + 1
 			end
-			if DrawStringWidth(height, "VAR", str:sub(lineStart, s - 1)) > width then
+			if graphics:DrawStringWidth(height, "VAR", str:sub(lineStart, s - 1)) > width then
 				t_insert(wrapTable, str:sub(lineStart, lastBreak))
 				lineStart = lastSpace
 			end

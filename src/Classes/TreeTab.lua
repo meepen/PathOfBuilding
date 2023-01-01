@@ -186,15 +186,15 @@ function TreeTabClass:Draw(viewPort, inputEvents)
 
 	for id, event in ipairs(inputEvents) do
 		if event.type == "KeyDown" then
-			if event.key == "z" and IsKeyDown("CTRL") then
+			if event.key == "z" and engine:IsKeyDown("CTRL") then
 				self.build.spec:Undo()
 				self.build.buildFlag = true
 				inputEvents[id] = nil
-			elseif event.key == "y" and IsKeyDown("CTRL") then
+			elseif event.key == "y" and engine:IsKeyDown("CTRL") then
 				self.build.spec:Redo()
 				self.build.buildFlag = true
 				inputEvents[id] = nil
-			elseif event.key == "f" and IsKeyDown("CTRL") then
+			elseif event.key == "f" and engine:IsKeyDown("CTRL") then
 				self:SelectControl(self.controls.treeSearch)
 			end
 		end
@@ -265,18 +265,18 @@ function TreeTabClass:Draw(viewPort, inputEvents)
 		end
 	end
 
-	SetDrawLayer(1)
+	graphics:SetDrawLayer(1)
 
-	SetDrawColor(0.05, 0.05, 0.05)
-	DrawImage(nil, viewPort.x, viewPort.y + viewPort.height - (28 + bottomDrawerHeight + twoLineHeight), viewPort.width, 28 + bottomDrawerHeight + twoLineHeight)
-	SetDrawColor(0.85, 0.85, 0.85)
-	DrawImage(nil, viewPort.x, viewPort.y + viewPort.height - (32 + bottomDrawerHeight + twoLineHeight), viewPort.width, 4)
+	graphics:SetDrawColor(0.05, 0.05, 0.05)
+	graphics:DrawImage(nil, viewPort.x, viewPort.y + viewPort.height - (28 + bottomDrawerHeight + twoLineHeight), viewPort.width, 28 + bottomDrawerHeight + twoLineHeight)
+	graphics:SetDrawColor(0.85, 0.85, 0.85)
+	graphics:DrawImage(nil, viewPort.x, viewPort.y + viewPort.height - (32 + bottomDrawerHeight + twoLineHeight), viewPort.width, 4)
 
 	if self.showConvert then
-		SetDrawColor(0.05, 0.05, 0.05)
-		DrawImage(nil, viewPort.x, viewPort.y + viewPort.height - (60 + bottomDrawerHeight + twoLineHeight), viewPort.width, 28)
-		SetDrawColor(0.85, 0.85, 0.85)
-		DrawImage(nil, viewPort.x, viewPort.y + viewPort.height - (64 + bottomDrawerHeight + twoLineHeight), viewPort.width, 4)
+		graphics:SetDrawColor(0.05, 0.05, 0.05)
+		graphics:DrawImage(nil, viewPort.x, viewPort.y + viewPort.height - (60 + bottomDrawerHeight + twoLineHeight), viewPort.width, 28)
+		graphics:SetDrawColor(0.85, 0.85, 0.85)
+		graphics:DrawImage(nil, viewPort.x, viewPort.y + viewPort.height - (64 + bottomDrawerHeight + twoLineHeight), viewPort.width, 4)
 	end
 
 	self:DrawControls(viewPort)
@@ -499,7 +499,7 @@ function TreeTabClass:OpenExportPopup()
 		end)
 	end)
 	controls.copy = new("ButtonControl", nil, 30, 70, 80, 20, "Copy", function()
-		Copy(treeLink)
+		 engine:Copy(treeLink)
 	end)
 	controls.done = new("ButtonControl", nil, 120, 70, 80, 20, "Done", function()
 		main:ClosePopup()
@@ -1547,7 +1547,7 @@ function TreeTabClass:FindTimelessJewel()
 			}
 		}
 
-		Copy("https://www.pathofexile.com/trade/search/?q=" .. (s_gsub(dkjson.encode(search), "[^a-zA-Z0-9]", function(a)
+		 engine:Copy("https://www.pathofexile.com/trade/search/?q=" .. (s_gsub(dkjson.encode(search), "[^a-zA-Z0-9]", function(a)
 			return s_format("%%%02X", s_byte(a))
 		end)))
 

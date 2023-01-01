@@ -42,6 +42,6 @@ for _, line in ipairs(lines) do
 		os.remove(file)
 	elseif op == "start" then
 		local target = args:match('"(.*)"')
-		SpawnProcess(target)
+		engine:SpawnProcess(target)
 	end
 end

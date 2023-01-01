@@ -193,7 +193,7 @@ function GemSelectClass:BuildList(buf)
 end
 
 function GemSelectClass:UpdateSortCache()
-	--local start = GetTime()
+	--local start = engine:GetTime()
 	local sortCache = self.sortCache
 	-- Don't update the cache if no settings have changed that would impact the ordering
 	if sortCache and sortCache.socketGroup == self.skillsTab.displayGroup and sortCache.gemInstance == self.skillsTab.displayGroup.gemList[self.index]
@@ -288,7 +288,7 @@ function GemSelectClass:UpdateSortCache()
 			sortCache.dpsColor[gemId] = "^xFFFF66"
 		end
 	end
-	--ConPrintf("Gem Selector time: %d ms", GetTime() - start)
+	--ConPrintf("Gem Selector time: %d ms", engine:GetTime() - start)
 end
 
 function GemSelectClass:SortGemList(gemList)
@@ -337,7 +337,7 @@ function GemSelectClass:IsMouseOver()
 	end
 	local x, y = self:GetPos()
 	local width, height = self:GetSize()
-	local cursorX, cursorY = GetCursorPos()
+	local cursorX, cursorY = engine:GetCursorPos()
 	local dropExtra = self.dropped and (height - 4) * m_min(#self.list, 15) + 2 or 0
 	local mOver = cursorX >= x and cursorY >= y and cursorX < x + width and cursorY < y + height + dropExtra
 	local mOverComp
@@ -361,62 +361,62 @@ function GemSelectClass:Draw(viewPort, noTooltip)
 	local scrollBar = self.controls.scrollBar
 	scrollBar:SetContentDimension((height - 4) * #self.list, dropHeight)
 	if self.dropped then
-		SetDrawLayer(nil, 5)
-		SetDrawColor(1, 1, 1)
-		DrawImage(nil, x, y + height, width, dropHeight + 4)
-		SetDrawColor(0, 0, 0)
-		DrawImage(nil, x + 1, y + height + 1, width - 2, dropHeight + 2)
-		SetDrawLayer(nil, 0)
+		graphics:SetDrawLayer(nil, 5)
+		graphics:SetDrawColor(1, 1, 1)
+		graphics:DrawImage(nil, x, y + height, width, dropHeight + 4)
+		graphics:SetDrawColor(0, 0, 0)
+		graphics:DrawImage(nil, x + 1, y + height + 1, width - 2, dropHeight + 2)
+		graphics:SetDrawLayer(nil, 0)
 	end
 	if self.dropped then
-		SetDrawLayer(nil, 5)
-		local cursorX, cursorY = GetCursorPos()
+		graphics:SetDrawLayer(nil, 5)
+		local cursorX, cursorY = engine:GetCursorPos()
 		self.hoverSel = mOverComp == "DROP" and math.floor((cursorY - y - height + scrollBar.offset) / (height - 4)) + 1
 		if self.hoverSel and not self.gems[self.list[self.hoverSel]] then
 			self.hoverSel = nil
 		end
-		SetViewport(x + 2, y + height + 2, width - 4, dropHeight)
+		graphics:SetViewport(x + 2, y + height + 2, width - 4, dropHeight)
 		local minIndex = m_floor(scrollBar.offset / 16 + 1)
 		local maxIndex = m_min(m_floor((scrollBar.offset + dropHeight) / 16 + 1), #self.list)
 		for index = minIndex, maxIndex do
 			local y = (index - 1) * (height - 4) - scrollBar.offset
 			if index == self.hoverSel or index == self.selIndex or (index == 1 and self.selIndex == 0) then
-				SetDrawColor(0.33, 0.33, 0.33)
-				DrawImage(nil, 0, y, width - 4, height - 4)
+				graphics:SetDrawColor(0.33, 0.33, 0.33)
+				graphics:DrawImage(nil, 0, y, width - 4, height - 4)
 			end
-			SetDrawColor(1, 1, 1)
+			graphics:SetDrawColor(1, 1, 1)
 			local gemId = self.list[index]
 			local gemData = self.gems[gemId]
 			if gemData then
 				if gemData.grantedEffect.color == 1 then
-					SetDrawColor(colorCodes.STRENGTH)
+					graphics:SetDrawColor(colorCodes.STRENGTH)
 				elseif gemData.grantedEffect.color == 2 then
-					SetDrawColor(colorCodes.DEXTERITY)
+					graphics:SetDrawColor(colorCodes.DEXTERITY)
 				elseif gemData.grantedEffect.color == 3 then
-					SetDrawColor(colorCodes.INTELLIGENCE)
+					graphics:SetDrawColor(colorCodes.INTELLIGENCE)
 				end
 			end
 			local gemText = gemData and gemData.name or "<No matches>"
 			if gemId and gemId ~= "" then
 				gemText = altQualMap[self:GetQualityType(gemId)] .. gemText
 			end
-			DrawString(0, y, "LEFT", height - 4, "VAR", gemText)
+			graphics:DrawString(0, y, "LEFT", height - 4, "VAR", gemText)
 			if gemData then
 				if gemData.grantedEffect.support and self.skillsTab.displayGroup.displaySkillList then
 					for _, activeSkill in ipairs(self.skillsTab.displayGroup.displaySkillList) do
 						if calcLib.canGrantedEffectSupportActiveSkill(gemData.grantedEffect, activeSkill) then
-							SetDrawColor(self.sortCache.dpsColor[gemId])
+							graphics:SetDrawColor(self.sortCache.dpsColor[gemId])
 							main:DrawCheckMark(width - 4 - height / 2 - (scrollBar.enabled and 18 or 0), y + (height - 4) / 2, (height - 4) * 0.8)
 							break
 						end
 					end
 				elseif gemData.grantedEffect.hasGlobalEffect then
-					SetDrawColor(self.sortCache.dpsColor[gemId])
-					DrawString(width - 4 - height / 2 - (scrollBar.enabled and 18 or 0), y - 2, "CENTER_X", height, "VAR", "+")
+					graphics:SetDrawColor(self.sortCache.dpsColor[gemId])
+					graphics:DrawString(width - 4 - height / 2 - (scrollBar.enabled and 18 or 0), y - 2, "CENTER_X", height, "VAR", "+")
 				end
 			end
 		end
-		SetViewport()
+		graphics:SetViewport()
 		self:DrawControls(viewPort, (noTooltip and not self.forceTooltip) and self)
 		if self.hoverSel then
 			local calcFunc, calcBase = self.skillsTab.build.calcsTab:GetMiscCalculator(self.build)
@@ -465,7 +465,7 @@ function GemSelectClass:Draw(viewPort, noTooltip)
 				self.tooltip:Draw(x, y + height + 2 + (self.hoverSel - 1) * (height - 4) - scrollBar.offset, width, height - 4, viewPort)
 			end
 		end
-		SetDrawLayer(nil, 0)
+		graphics:SetDrawLayer(nil, 0)
 	else
 		-- not dropped
 		local hoverControl 
@@ -479,13 +479,13 @@ function GemSelectClass:Draw(viewPort, noTooltip)
 			local hoverGem = self.skillsTab.displayGroup.gemList[hoverControl.index]
 			if thisGem and hoverGem and thisGem.enabled and hoverGem.enabled and thisGem.gemData and hoverGem.gemData and
 			  (self:CheckSupporting(thisGem, hoverGem) or self:CheckSupporting(hoverGem, thisGem)) then
-			   SetDrawColor(0.33, 1, 0.33, 0.25)
-			   DrawImage(nil, x, y, width, height)
+			   graphics:SetDrawColor(0.33, 1, 0.33, 0.25)
+			   graphics:DrawImage(nil, x, y, width, height)
 			end
 		end
 		if mOver and (not self.skillsTab.selControl or self.skillsTab.selControl._className ~= "GemSelectControl" or not self.skillsTab.selControl.dropped) and (not noTooltip or self.forceTooltip) then
 			local gemInstance = self.skillsTab.displayGroup.gemList[self.index]
-			SetDrawLayer(nil, 10)
+			graphics:SetDrawLayer(nil, 10)
 			self.tooltip:Clear()
 			if gemInstance and gemInstance.gemData then
 				-- Check valid qualityId, set to 'Default' if missing
@@ -497,7 +497,7 @@ function GemSelectClass:Draw(viewPort, noTooltip)
 				self.tooltip:AddLine(16, toolTipText)
 			end
 			self.tooltip:Draw(x, y, width, height, viewPort)
-			SetDrawLayer(nil, 0)
+			graphics:SetDrawLayer(nil, 0)
 		end
 	end
 end
@@ -628,7 +628,7 @@ function GemSelectClass:AddCommonGemInfo(gemInstance, grantedEffect, addReq, mer
 		self.skillsTab.build:AddRequirementsToTooltip(self.tooltip, reqLevel, reqStr, reqDex, reqInt)
 	end
 	if grantedEffect.description then
-		local wrap = main:WrapString(grantedEffect.description, 16, m_max(DrawStringWidth(16, "VAR", gemInstance.gemData.tagString), 400))
+		local wrap = main:WrapString(grantedEffect.description, 16, m_max(graphics:DrawStringWidth(16, "VAR", gemInstance.gemData.tagString), 400))
 		for _, line in ipairs(wrap) do
 			self.tooltip:AddLine(16, colorCodes.GEM..line)
 		end

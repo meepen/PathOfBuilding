@@ -90,9 +90,9 @@ function NotesTabClass:Draw(viewPort, inputEvents)
 
 	for id, event in ipairs(inputEvents) do
 		if event.type == "KeyDown" then
-			if event.key == "z" and IsKeyDown("CTRL") then
+			if event.key == "z" and engine:IsKeyDown("CTRL") then
 				self.controls.edit:Undo()
-			elseif event.key == "y" and IsKeyDown("CTRL") then
+			elseif event.key == "y" and engine:IsKeyDown("CTRL") then
 				self.controls.edit:Redo()
 			end
 		end

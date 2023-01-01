@@ -598,23 +598,23 @@ local function loadJewelFile(jewelTypeName)
 	jewelTypeName = "/Data/TimelessJewelData/" .. jewelTypeName
 	local jewelData
 
-	local scriptPath = GetScriptPath()
+	local scriptPath = engine:GetScriptPath()
 
-	local fileHandle = NewFileSearch(scriptPath .. jewelTypeName .. ".bin")
+	local fileHandle = engine:NewFileSearch(scriptPath .. jewelTypeName .. ".bin")
 	local uncompressedFileAttr = { }
 	if fileHandle then
 		uncompressedFileAttr.fileName = fileHandle:GetFileName()
 		uncompressedFileAttr.modified = fileHandle:GetFileModifiedTime()
 	end
 
-	fileHandle = NewFileSearch(scriptPath .. jewelTypeName .. ".zip")
+	fileHandle = engine:NewFileSearch(scriptPath .. jewelTypeName .. ".zip")
 	local compressedFileAttr = { }
 	if fileHandle then
 		compressedFileAttr.fileName = fileHandle:GetFileName()
 		compressedFileAttr.modified = fileHandle:GetFileModifiedTime()
 	end
 
-	fileHandle = NewFileSearch(scriptPath .. jewelTypeName .. ".zip.part*")
+	fileHandle = engine:NewFileSearch(scriptPath .. jewelTypeName .. ".zip.part*")
 	local splitFile = { }
 	if fileHandle then
 		compressedFileAttr.modified = fileHandle:GetFileModifiedTime()
@@ -646,10 +646,10 @@ local function loadJewelFile(jewelTypeName)
 	ConPrintf("Failed to load " .. scriptPath .. jewelTypeName .. ".bin, or data is out of date, falling back to compressed file")
 	local compressedFile = io.open(scriptPath .. jewelTypeName .. ".zip", "rb")
 	if compressedFile then
-		jewelData = Inflate(compressedFile:read("*a"))
+		jewelData = engine:Inflate(compressedFile:read("*a"))
 		compressedFile:close()
 	elseif splitFile ~= "" then
-		jewelData = Inflate(splitFile)
+		jewelData = engine:Inflate(splitFile)
 	end
 
 	if jewelData == nil then
@@ -670,7 +670,7 @@ local function loadJewelFile(jewelTypeName)
 				if jewelType == 1 then
 					ConPrintf("GV needs to be split manually")
 				else
-					local compressedFileData = Deflate(jewelData)
+					local compressedFileData = engine:Deflate(jewelData)
 					local file = assert(io.open(scriptPath .. "Data/TimelessJewelData/" .. jewelTypeName .. ".zip", "wb+"))
 					file:write(compressedFileData)
 					file:close()
@@ -806,7 +806,7 @@ if not data.nodeIDList.size and launch.devMode then -- this doesn't rebuilt the 
 		ConPrintf("missing GV file to rebuild NodeIndexMapping")
 	else
 		ConPrintf("attempting to rebuild NodeIndexMapping")
-		local scriptPath = GetScriptPath()
+		local scriptPath = engine:GetScriptPath()
 		local compressedFile = io.open(scriptPath .. "/Data/TimelessJewelData/node_indices.csv", "rb")
 		if compressedFile then
 			ConPrintf("csv found")

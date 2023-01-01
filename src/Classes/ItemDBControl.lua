@@ -223,7 +223,7 @@ function ItemDBClass:ListBuilder()
 	end
 
 	if self.sortDetail and self.sortDetail.stat then -- stat-based
-		local start = GetTime()
+		local start = engine:GetTime()
 		local calcFunc, calcBase = self.itemsTab.build.calcsTab:GetMiscCalculator(self.build)
 		local storedGlobalCacheDPSView = GlobalCache.useFullDPS
 		GlobalCache.useFullDPS = GlobalCache.numActiveSkillInFullDPS > 0
@@ -239,7 +239,7 @@ function ItemDBClass:ListBuilder()
 					item.measuredPower = m_max(item.measuredPower, measuredPower)
 				end
 			end
-			local now = GetTime()
+			local now = engine:GetTime()
 			if now - start > 50 then
 				self.defaultText = "^7Sorting... ("..m_floor(itemIndex/#list*100).."%)"
 				coroutine.yield()
@@ -308,7 +308,7 @@ function ItemDBClass:AddValueTooltip(tooltip, index, item)
 		tooltip:Clear()
 		return
 	end
-	if tooltip:CheckForUpdate(item, IsKeyDown("SHIFT"), launch.devModeAlt, self.itemsTab.build.outputRevision) then
+	if tooltip:CheckForUpdate(item, engine:IsKeyDown("SHIFT"), launch.devModeAlt, self.itemsTab.build.outputRevision) then
 		self.itemsTab:AddItemTooltip(tooltip, item, nil, true)
 	end
 end
@@ -318,7 +318,7 @@ function ItemDBClass:GetDragValue(index, item)
 end
 
 function ItemDBClass:OnSelClick(index, item, doubleClick)
-	if IsKeyDown("CTRL") then
+	if engine:IsKeyDown("CTRL") then
 		-- Add item
 		local newItem = new("Item", item.raw)
 		newItem:NormaliseQuality()
@@ -331,7 +331,7 @@ function ItemDBClass:OnSelClick(index, item, doubleClick)
 				-- Redirect to second weapon set
 				slotName = slotName .. " Swap"
 			end
-			if IsKeyDown("SHIFT") then
+			if engine:IsKeyDown("SHIFT") then
 				-- Redirect to second slot if possible
 				local altSlot = slotName:gsub("1","2")
 				if self.itemsTab:IsItemValidForSlot(newItem, altSlot) then
@@ -350,7 +350,7 @@ function ItemDBClass:OnSelClick(index, item, doubleClick)
 end
 
 function ItemDBClass:OnSelCopy(index, item)
-	Copy(item.raw:gsub("\n","\r\n"))
+	 engine:Copy(item.raw:gsub("\n","\r\n"))
 end
 
 function ItemDBClass:OnHoverKeyUp(key)

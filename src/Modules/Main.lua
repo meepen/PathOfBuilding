@@ -44,18 +44,18 @@ function main:Init()
 	self.modes["LIST"] = LoadModule("Modules/BuildList")
 	self.modes["BUILD"] = LoadModule("Modules/Build")
 
-	if launch.devMode or (GetScriptPath() == GetRuntimePath() and not launch.installedMode) then
+	if launch.devMode or (engine:GetScriptPath() == engine:GetRuntimePath() and not launch.installedMode) then
 		-- If running in dev mode or standalone mode, put user data in the script path
-		self.userPath = GetScriptPath().."/"
+		self.userPath = engine:GetScriptPath().."/"
 	else
-		self.userPath = GetUserPath().."/Path of Building/"
-		MakeDir(self.userPath)
+		self.userPath = engine:GetUserPath().."/Path of Building/"
+		engine:MakeDir(self.userPath)
 	end
 	self.defaultBuildPath = self.userPath.."Builds/"
 	self.buildPath = self.defaultBuildPath
-	MakeDir(self.buildPath)
+	engine:MakeDir(self.buildPath)
 
-	if launch.devMode and IsKeyDown("CTRL") then
+	if launch.devMode and engine:IsKeyDown("CTRL") then
 		-- If modLib.parseMod doesn't find a cache entry it generates it.
 		-- Not loading pre-generated cache causes it to be rebuilt
 		self.saveNewModCache = true
@@ -64,7 +64,7 @@ function main:Init()
 		LoadModule("Data/ModCache", modLib.parseModCache)
 	end
 
-	if launch.devMode and IsKeyDown("CTRL") and IsKeyDown("SHIFT") then
+	if launch.devMode and engine:IsKeyDown("CTRL") and engine:IsKeyDown("SHIFT") then
 		self.allowTreeDownload = true
 	end
 
@@ -95,7 +95,7 @@ function main:Init()
 			if not isSuccess then
 				self:SetMode("BUILD", false, data)
 			else
-				local xmlText = Inflate(common.base64.decode(data:gsub("-","+"):gsub("_","/")))
+				local xmlText = engine:Inflate(common.base64.decode(data:gsub("-","+"):gsub("_","/")))
 				self:SetMode("BUILD", false, "Imported Build", xmlText)
 				self.newModeChangeToTree = true
 			end
@@ -194,7 +194,7 @@ function main:Init()
 	end
 	self.controls.dismissToast = new("ButtonControl", {"BOTTOMLEFT",self.anchorMain,"BOTTOMLEFT"}, 0, function() return -self.mainBarHeight + self.toastHeight end, 80, 20, "Dismiss", function()
 		self.toastMode = "HIDING"
-		self.toastStart = GetTime()
+		self.toastStart = engine:GetTime()
 	end)
 	self.controls.dismissToast.shown = function()
 		return self.toastMode == "SHOWN"
@@ -203,7 +203,7 @@ function main:Init()
 	self.mainBarHeight = 58
 	self.toastMessages = { }
 
-	if launch.devMode and GetTime() >= 0 and GetTime() < 15000 then
+	if launch.devMode and engine:GetTime() >= 0 and engine:GetTime() < 15000 then
 		t_insert(self.toastMessages, [[
 ^xFF7700Warning: ^7Developer Mode active!
 The program is currently running in developer
@@ -268,7 +268,7 @@ function main:Shutdown()
 end
 
 function main:OnFrame()
-	self.screenW, self.screenH = GetScreenSize()
+	self.screenW, self.screenH = graphics:GetScreenSize()
 
 	if self.screenH > self.screenW then
 		self.portraitMode = true
@@ -317,11 +317,11 @@ function main:OnFrame()
 	if self.toastMessages[1] then
 		if not self.toastMode then
 			self.toastMode = "SHOWING"
-			self.toastStart = GetTime()
+			self.toastStart = engine:GetTime()
 			self.toastHeight = #self.toastMessages[1]:gsub("[^\n]","") * 16 + 20 + 40
 		end
 		if self.toastMode == "SHOWING" then
-			local now = GetTime()
+			local now = engine:GetTime()
 			if now >= self.toastStart + 250 then
 				self.toastMode = "SHOWN"
 			else
@@ -331,7 +331,7 @@ function main:OnFrame()
 		if self.toastMode == "SHOWN" then
 			self.mainBarHeight = 58 + self.toastHeight
 		elseif self.toastMode == "HIDING" then
-			local now = GetTime()
+			local now = engine:GetTime()
 			if now >= self.toastStart + 75 then
 				self.toastMode = nil
 				self.mainBarHeight = 58
@@ -341,39 +341,39 @@ function main:OnFrame()
 			end
 		end
 		if self.toastMode then
-			SetDrawColor(0.85, 0.85, 0.85)
-			DrawImage(nil, 0, self.screenH - self.mainBarHeight, 312, self.mainBarHeight)
-			SetDrawColor(0.1, 0.1, 0.1)
-			DrawImage(nil, 0, self.screenH - self.mainBarHeight + 4, 308, self.mainBarHeight - 4)
-			SetDrawColor(1, 1, 1)
-			DrawString(4, self.screenH - self.mainBarHeight + 8, "LEFT", 20, "VAR", self.toastMessages[1]:gsub("\n.*",""))
-			DrawString(4, self.screenH - self.mainBarHeight + 28, "LEFT", 16, "VAR", self.toastMessages[1]:gsub("^[^\n]*\n?",""))
+			graphics:SetDrawColor(0.85, 0.85, 0.85)
+			graphics:DrawImage(nil, 0, self.screenH - self.mainBarHeight, 312, self.mainBarHeight)
+			graphics:SetDrawColor(0.1, 0.1, 0.1)
+			graphics:DrawImage(nil, 0, self.screenH - self.mainBarHeight + 4, 308, self.mainBarHeight - 4)
+			graphics:SetDrawColor(1, 1, 1)
+			graphics:DrawString(4, self.screenH - self.mainBarHeight + 8, "LEFT", 20, "VAR", self.toastMessages[1]:gsub("\n.*",""))
+			graphics:DrawString(4, self.screenH - self.mainBarHeight + 28, "LEFT", 16, "VAR", self.toastMessages[1]:gsub("^[^\n]*\n?",""))
 		end
 	end
 
 	-- Draw main controls
-	SetDrawColor(0.85, 0.85, 0.85)
-	DrawImage(nil, 0, self.screenH - 58, 312, 58)
-	SetDrawColor(0.1, 0.1, 0.1)
-	DrawImage(nil, 0, self.screenH - 54, 308, 54)
+	graphics:SetDrawColor(0.85, 0.85, 0.85)
+	graphics:DrawImage(nil, 0, self.screenH - 58, 312, 58)
+	graphics:SetDrawColor(0.1, 0.1, 0.1)
+	graphics:DrawImage(nil, 0, self.screenH - 54, 308, 54)
 	self:DrawControls(self.viewPort)
 
 	if self.popups[1] then
-		SetDrawLayer(10)
-		SetDrawColor(0, 0, 0, 0.5)
-		DrawImage(nil, 0, 0, self.screenW, self.screenH)
+		graphics:SetDrawLayer(10)
+		graphics:SetDrawColor(0, 0, 0, 0.5)
+		graphics:DrawImage(nil, 0, 0, self.screenW, self.screenH)
 		self.popups[1]:Draw(self.viewPort)
-		SetDrawLayer(0)
+		graphics:SetDrawLayer(0)
 	end
 
 	if self.showDragText then
-		local cursorX, cursorY = GetCursorPos()
-		local strWidth = DrawStringWidth(16, "VAR", self.showDragText)
-		SetDrawLayer(20, 0)
-		SetDrawColor(0.15, 0.15, 0.15, 0.75)
-		DrawImage(nil, cursorX, cursorY - 8, strWidth + 2, 18)
-		SetDrawColor(1, 1, 1)
-		DrawString(cursorX + 1, cursorY - 7, "LEFT", 16, "VAR", self.showDragText)
+		local cursorX, cursorY = engine:GetCursorPos()
+		local strWidth = graphics:DrawStringWidth(16, "VAR", self.showDragText)
+		graphics:SetDrawLayer(20, 0)
+		graphics:SetDrawColor(0.15, 0.15, 0.15, 0.75)
+		graphics:DrawImage(nil, cursorX, cursorY - 8, strWidth + 2, 18)
+		graphics:SetDrawColor(1, 1, 1)
+		graphics:DrawString(cursorX + 1, cursorY - 7, "LEFT", 16, "VAR", self.showDragText)
 		self.showDragText = nil
 	end
 
@@ -384,18 +384,18 @@ function main:OnFrame()
 			local defCol = (y / par * 1.5) ^ 0.5
 			local mixCol = (m_max(dpsCol - 0.5, 0) + m_max(defCol - 0.5, 0)) / 2
 			if main.nodePowerTheme == "RED/BLUE" then
-				SetDrawColor(dpsCol, mixCol, defCol)
+				graphics:SetDrawColor(dpsCol, mixCol, defCol)
 			elseif main.nodePowerTheme == "RED/GREEN" then
-				SetDrawColor(dpsCol, defCol, mixCol)
+				graphics:SetDrawColor(dpsCol, defCol, mixCol)
 			elseif main.nodePowerTheme == "GREEN/BLUE" then
-				SetDrawColor(mixCol, dpsCol, defCol)
+				graphics:SetDrawColor(mixCol, dpsCol, defCol)
 			end
-			DrawImage(nil, x + 500, y + 200, 1, 1)
+			graphics:DrawImage(nil, x + 500, y + 200, 1, 1)
 		end
 	end
-	SetDrawColor(0, 0, 0)
-	DrawImage(nil, par + 500, 200, 2, 750)
-	DrawImage(nil, 500, par + 200, 759, 2)]]
+	graphics:SetDrawColor(0, 0, 0)
+	graphics:DrawImage(nil, par + 500, 200, 2, 750)
+	graphics:DrawImage(nil, 500, par + 200, 759, 2)]]
 
 	wipeTable(self.inputEvents)
 
@@ -907,7 +907,7 @@ function main:OpenAboutPopup()
 	controls.version = new("LabelControl", nil, 0, 18, 0, 18, "^7Path of Building Community Fork v"..launch.versionNumber)
 	controls.forum = new("LabelControl", nil, 0, 36, 0, 18, "^7Based on Openarl's Path of Building")
 	controls.github = new("ButtonControl", nil, 0, 62, 438, 18, "^7GitHub page: ^x4040FFhttps://github.com/PathOfBuildingCommunity/PathOfBuilding", function(control)
-		OpenURL("https://github.com/PathOfBuildingCommunity/PathOfBuilding")
+		engine:OpenURL("https://github.com/PathOfBuildingCommunity/PathOfBuilding")
 	end)
 	controls.verLabel = new("LabelControl", { "TOPLEFT", nil, "TOPLEFT" }, 10, 82, 0, 18, "^7Version history:")
 	controls.changelog = new("TextListControl", nil, 0, 100, 630, 390, nil, changeList)
@@ -915,14 +915,14 @@ function main:OpenAboutPopup()
 end
 
 function main:DrawBackground(viewPort)
-	SetDrawLayer(nil, -100)
-	SetDrawColor(0.5, 0.5, 0.5)
+	graphics:SetDrawLayer(nil, -100)
+	graphics:SetDrawColor(0.5, 0.5, 0.5)
 	if self.tree[latestTreeVersion].assets.Background2 then
-		DrawImage(self.tree[latestTreeVersion].assets.Background2.handle, viewPort.x, viewPort.y, viewPort.width, viewPort.height, 0, 0, viewPort.width / 100, viewPort.height / 100)
+		graphics:DrawImage(self.tree[latestTreeVersion].assets.Background2.handle, viewPort.x, viewPort.y, viewPort.width, viewPort.height, 0, 0, viewPort.width / 100, viewPort.height / 100)
 	else
-		DrawImage(self.tree[latestTreeVersion].assets.Background1.handle, viewPort.x, viewPort.y, viewPort.width, viewPort.height, 0, 0, viewPort.width / 100, viewPort.height / 100)
+		graphics:DrawImage(self.tree[latestTreeVersion].assets.Background1.handle, viewPort.x, viewPort.y, viewPort.width, viewPort.height, 0, 0, viewPort.width / 100, viewPort.height / 100)
 	end
-	SetDrawLayer(nil, 0)
+	graphics:SetDrawLayer(nil, 0)
 end
 
 function main:DrawArrow(x, y, width, height, dir)
@@ -933,13 +933,13 @@ function main:DrawArrow(x, y, width, height, dir)
 	local y2 = y + height / 2
 	local yMid = (y1 + y2) / 2
 	if dir == "UP" then
-		DrawImageQuad(nil, xMid, y1, xMid, y1, x2, y2, x1, y2)
+		graphics:DrawImageQuad(nil, xMid, y1, xMid, y1, x2, y2, x1, y2)
 	elseif dir == "RIGHT" then
-		DrawImageQuad(nil, x1, y1, x2, yMid, x2, yMid, x1, y2)
+		graphics:DrawImageQuad(nil, x1, y1, x2, yMid, x2, yMid, x1, y2)
 	elseif dir == "DOWN" then
-		DrawImageQuad(nil, x1, y1, x2, y1, xMid, y2, xMid, y2)
+		graphics:DrawImageQuad(nil, x1, y1, x2, y1, xMid, y2, xMid, y2)
 	elseif dir == "LEFT" then
-		DrawImageQuad(nil, x1, yMid, x2, y1, x2, y2, x1, yMid)
+		graphics:DrawImageQuad(nil, x1, yMid, x2, y1, x2, y2, x1, yMid)
 	end
 end
 
@@ -947,8 +947,8 @@ function main:DrawCheckMark(x, y, size)
 	size = size / 0.8
 	x = x - size / 2
 	y = y - size / 2
-	DrawImageQuad(nil, x + size * 0.15, y + size * 0.50, x + size * 0.30, y + size * 0.45, x + size * 0.50, y + size * 0.80, x + size * 0.40, y + size * 0.90)
-	DrawImageQuad(nil, x + size * 0.40, y + size * 0.90, x + size * 0.35, y + size * 0.75, x + size * 0.80, y + size * 0.10, x + size * 0.90, y + size * 0.20)
+	graphics:DrawImageQuad(nil, x + size * 0.15, y + size * 0.50, x + size * 0.30, y + size * 0.45, x + size * 0.50, y + size * 0.80, x + size * 0.40, y + size * 0.90)
+	graphics:DrawImageQuad(nil, x + size * 0.40, y + size * 0.90, x + size * 0.35, y + size * 0.75, x + size * 0.80, y + size * 0.10, x + size * 0.90, y + size * 0.20)
 end
 
 do
@@ -985,7 +985,7 @@ function main:RenderCircle(x, y, width, height, oX, oY, radius)
 	end
 	for ly = minY, maxY do
 		if minX[ly] then
-			DrawImage(nil, x + minX[ly], y + ly, maxX[ly] - minX[ly] + 1, 1)
+			graphics:DrawImage(nil, x + minX[ly], y + ly, maxX[ly] - minX[ly] + 1, 1)
 		end
 	end
 end
@@ -996,7 +996,7 @@ function main:RenderRing(x, y, width, height, oX, oY, radius, size)
 		local r = d / 180 * m_pi
 		local px, py = main:WorldToScreen(oX + m_sin(r) * radius, oY + m_cos(r) * radius, 0, width, height)
 		if px >= -size/2 and px < width + size/2 and py >= -size/2 and py < height + size/2 and (px ~= lastX or py ~= lastY) then
-			DrawImage(nil, x + px - size/2, y + py, size, size)
+			graphics:DrawImage(nil, x + px - size/2, y + py, size, size)
 			lastX, lastY = px, py
 		end
 	end
@@ -1014,14 +1014,14 @@ end
 
 function main:MoveFolder(name, srcPath, dstPath)
 	-- Create destination folder
-	local res, msg = MakeDir(dstPath..name)
+	local res, msg = engine:MakeDir(dstPath..name)
 	if not res then
 		self:OpenMessagePopup("Error", "Couldn't move '"..name.."' to '"..dstPath.."' : "..msg)
 		return
 	end
 
 	-- Move subfolders
-	local handle = NewFileSearch(srcPath..name.."/*", true)
+	local handle = engine:NewFileSearch(srcPath..name.."/*", true)
 	while handle do
 		self:MoveFolder(handle:GetFileName(), srcPath..name.."/", dstPath..name.."/")
 		if not handle:NextFile() then
@@ -1030,7 +1030,7 @@ function main:MoveFolder(name, srcPath, dstPath)
 	end
 
 	-- Move files
-	handle = NewFileSearch(srcPath..name.."/*")
+	handle = engine:NewFileSearch(srcPath..name.."/*")
 	while handle do
 		local fileName = handle:GetFileName()
 		local srcName = srcPath..name.."/"..fileName
@@ -1046,7 +1046,7 @@ function main:MoveFolder(name, srcPath, dstPath)
 	end
 
 	-- Remove source folder
-	local res, msg = RemoveDir(srcPath..name)
+	local res, msg = engine:RemoveDir(srcPath..name)
 	if not res then
 		self:OpenMessagePopup("Error", "Couldn't delete '"..dstPath..name.."' : "..msg)
 		return
@@ -1055,14 +1055,14 @@ end
 
 function main:CopyFolder(srcName, dstName)
 	-- Create destination folder
-	local res, msg = MakeDir(dstName)
+	local res, msg = engine:MakeDir(dstName)
 	if not res then
 		self:OpenMessagePopup("Error", "Couldn't copy '"..srcName.."' to '"..dstName.."' : "..msg)
 		return
 	end
 
 	-- Copy subfolders
-	local handle = NewFileSearch(srcName.."/*", true)
+	local handle = engine:NewFileSearch(srcName.."/*", true)
 	while handle do
 		local fileName = handle:GetFileName()
 		self:CopyFolder(srcName.."/"..fileName, dstName.."/"..fileName)
@@ -1072,7 +1072,7 @@ function main:CopyFolder(srcName, dstName)
 	end
 
 	-- Copy files
-	handle = NewFileSearch(srcName.."/*")
+	handle = engine:NewFileSearch(srcName.."/*")
 	while handle do
 		local fileName = handle:GetFileName()
 		local srcName = srcName.."/"..fileName
@@ -1108,7 +1108,7 @@ function main:OpenMessagePopup(title, msg)
 	controls.close = new("ButtonControl", nil, 0, 40 + numMsgLines * 16, 80, 20, "Ok", function()
 		main:ClosePopup()
 	end)
-	return self:OpenPopup(m_max(DrawStringWidth(16, "VAR", msg) + 30, 190), 70 + numMsgLines * 16, title, controls, "close")
+	return self:OpenPopup(m_max(graphics:DrawStringWidth(16, "VAR", msg) + 30, 190), 70 + numMsgLines * 16, title, controls, "close")
 end
 
 function main:OpenConfirmPopup(title, msg, confirmLabel, onConfirm)
@@ -1118,7 +1118,7 @@ function main:OpenConfirmPopup(title, msg, confirmLabel, onConfirm)
 		t_insert(controls, new("LabelControl", nil, 0, 20 + numMsgLines * 16, 0, 16, line))
 		numMsgLines = numMsgLines + 1
 	end
-	local confirmWidth = m_max(80, DrawStringWidth(16, "VAR", confirmLabel) + 10)
+	local confirmWidth = m_max(80, graphics:DrawStringWidth(16, "VAR", confirmLabel) + 10)
 	controls.confirm = new("ButtonControl", nil, -5 - m_ceil(confirmWidth/2), 40 + numMsgLines * 16, confirmWidth, 20, confirmLabel, function()
 		main:ClosePopup()
 		onConfirm()
@@ -1126,7 +1126,7 @@ function main:OpenConfirmPopup(title, msg, confirmLabel, onConfirm)
 	t_insert(controls, new("ButtonControl", nil, 5 + m_ceil(confirmWidth/2), 40 + numMsgLines * 16, confirmWidth, 20, "Cancel", function()
 		main:ClosePopup()
 	end))
-	return self:OpenPopup(m_max(DrawStringWidth(16, "VAR", msg) + 30, 190), 70 + numMsgLines * 16, title, controls, "confirm")
+	return self:OpenPopup(m_max(graphics:DrawStringWidth(16, "VAR", msg) + 30, 190), 70 + numMsgLines * 16, title, controls, "confirm")
 end
 
 function main:OpenNewFolderPopup(path, onClose)
@@ -1137,7 +1137,7 @@ function main:OpenNewFolderPopup(path, onClose)
 	end)
 	controls.create = new("ButtonControl", nil, -45, 70, 80, 20, "Create", function()
 		local newFolderName = controls.edit.buf
-		local res, msg = MakeDir(path..newFolderName)
+		local res, msg = engine:MakeDir(path..newFolderName)
 		if not res then
 			main:OpenMessagePopup("Error", "Couldn't create '"..newFolderName.."': "..msg)
 			return
@@ -1159,9 +1159,9 @@ end
 
 function main:SetWindowTitleSubtext(subtext)
 	if not subtext or not self.showTitlebarName then
-		SetWindowTitle(APP_NAME)
+		engine:SetWindowTitle(APP_NAME)
 	else
-		SetWindowTitle(subtext.." - "..APP_NAME)
+		engine:SetWindowTitle(subtext.." - "..APP_NAME)
 	end
 end
 
@@ -1177,7 +1177,7 @@ do
 				s = #str + 1
 				e = #str + 1
 			end
-			if DrawStringWidth(height, "VAR", str:sub(lineStart, s - 1)) > width then
+			if graphics:DrawStringWidth(height, "VAR", str:sub(lineStart, s - 1)) > width then
 				t_insert(wrapTable, str:sub(lineStart, lastBreak))
 				lineStart = lastSpace
 			end

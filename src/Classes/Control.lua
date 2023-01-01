@@ -91,7 +91,7 @@ end
 function ControlClass:IsMouseInBounds()
 	local x, y = self:GetPos()
 	local width, height = self:GetSize()
-	local cursorX, cursorY = GetCursorPos()
+	local cursorX, cursorY = engine:GetCursorPos()
 	return cursorX >= x and cursorY >= y and cursorX < x + width and cursorY < y + height
 end
 
