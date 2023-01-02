@@ -1,3 +1,4 @@
+local profile = require("Engine.Love2D.Profiler")
 local Engine = {}
 local EngineMt = { __index = Engine }
 
@@ -38,7 +39,6 @@ local keyboardDownLookup = {
 }
 function Engine:IsKeyDown(keyName)
     if keyName == "WHEELUP" then
-        error(keyName)
         return self._currentMouseDown == "up"
     elseif keyName == "WHEELDOWN" then
         return self._currentMouseDown == "down"
@@ -180,6 +180,15 @@ function Engine:Start()
     end
 
     function love.keypressed(key, scanCode, isRepeat)
+        if not isRepeat then
+            if key == "f9" then
+                profile.start()
+            elseif key == "f10" then
+                profile.stop()
+            elseif key == "f11" then
+                error(profile.report())
+            end
+        end
         if not isRepeat and keyLookups[key] then
             callbacks:Run("OnKeyDown", keyLookups[key])
         end

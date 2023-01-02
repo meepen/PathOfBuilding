@@ -78,10 +78,10 @@ function Graphics:DrawImage(img, left, top, width, height, tcLeft, tcTop, tcRigh
                 left + width, top, 
                 left + width, top + height, 
                 left, top + height,
-                (tcLeft) / realWidth, (tcTop) / realHeight,
-                tcRight / realWidth, (tcTop) / realHeight,
-                tcRight / realWidth, tcBottom / realHeight,
-                (tcLeft) / realWidth, tcBottom / realHeight
+                tcLeft, tcTop,
+                tcRight, tcTop,
+                tcRight, tcBottom,
+                tcLeft, tcBottom
             )
         else
             love.graphics.draw(img.handle, left, top, 0, sx, sy)
@@ -131,32 +131,12 @@ local function memoizeLookupTable(...)
     return memoized
 end
 
-Graphics._memoizedMeshes = memoizeLookupTable(
-    "x1",
-    "y1",
-    "x2",
-    "y2",
-    "x3",
-    "y3",
-    "x4",
-    "y4",
-    "s1",
-    "t1",
-    "s2",
-    "t2",
-    "s3",
-    "t3",
-    "s4",
-    "t4",
-    function(args)
-        return love.graphics.newMesh({
-            { args.x1, args.y1, args.s1, args.t1 },
-            { args.x2, args.y2, args.s2, args.t2 },
-            { args.x3, args.y3, args.s3, args.t3 },
-            { args.x4, args.y4, args.s4, args.t4 },
-        })
-    end
-)
+Graphics._mesh = love.graphics.newMesh({
+    { 0, 0, 0, 0 },
+    { 1, 0, 1, 0 },
+    { 1, 1, 1, 1 },
+    { 0, 1, 0, 1 },
+}, "fan", "stream")
 
 function Graphics:DrawImageQuad(img, x1, y1, x2, y2, x3, y3, x4, y4, s1, t1, s2, t2, s3, t3, s4, t4)
     if not s1 then
@@ -166,15 +146,22 @@ function Graphics:DrawImageQuad(img, x1, y1, x2, y2, x3, y3, x4, y4, s1, t1, s2,
             1, 1,
             0, 1
     end
-    local mesh = self._memoizedMeshes[x1][y1][x2][y2][x3][y3][x4][y4][s1][t1][s2][t2][s3][t3][s4][t4]
+
+    local _mesh = self._mesh
+    
+    _mesh:setVertex(1, x1, y1, s1, t1)
+    _mesh:setVertex(2, x2, y2, s2, t2)
+    _mesh:setVertex(3, x3, y3, s3, t3)
+    _mesh:setVertex(4, x4, y4, s4, t4)
 
     if img then
-        mesh:setTexture(img.handle)
+        _mesh:setTexture(img.handle)
     end
 
-    love.graphics.draw(mesh)
+    love.graphics.draw(_mesh)
 end
 function Graphics:DrawString(left, top, align, height, font, text)
+    text = tostring(text)
     local r, g, b, a = love.graphics.getColor()
     local fontObject = love.graphics.getFont()
 
@@ -206,6 +193,7 @@ function Graphics:DrawString(left, top, align, height, font, text)
     love.graphics.setColor(r, g, b, a)
 end
 function Graphics:DrawStringWidth(height, font, text)
+    text = tostring(text)
     local fontObject = love.graphics.getFont()
     return fontObject:getWidth(self:StripEscapes(text))
 end
@@ -250,6 +238,7 @@ Graphics._ColorEscapes = {
 }
 
 function Graphics:SplitColoredText(text)
+    text = tostring(text)
     local result = {}
     local resultLen = 0
 
@@ -301,7 +290,7 @@ function Graphics:SplitColoredText(text)
 end
 
 function Graphics:StripEscapes(text)
-	return (text:gsub("^%d",""):gsub("^x%x%x%x%x%x%x",""))
+	return (tostring(text):gsub("^%d",""):gsub("^x%x%x%x%x%x%x",""))
 end
 
 function Graphics:SetDrawLayer(layer, subLayer)
@@ -391,7 +380,6 @@ return {
             _screenState = {
                 vsync = 1,
                 stencil = false,
-                depth = 8,
                 resizable = true,
             },
             _layers = {},
@@ -409,6 +397,8 @@ return {
 
         
         function love.draw()
+            love.graphics.setMeshCullMode("none")
+            love.graphics.setDepthMode()
             if not engine._hasStarted then
                 return
             end

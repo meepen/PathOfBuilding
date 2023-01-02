@@ -10,7 +10,9 @@ function Image:Load(fileName, ...)
     end
     local success
     success, self.handle = pcall(love.graphics.newImage, fileName, settings)
-    if not success then
+    if success and self.handle then
+        self.handle:setWrap("repeat", "repeat")
+    else
         self.handle = nil
     end
 end
