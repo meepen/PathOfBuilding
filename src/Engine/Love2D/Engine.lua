@@ -26,8 +26,30 @@ end
     "F6", "F7", "F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15",
     "NUMLOCK", "SCROLLLOCK",
 ]]
+local mouseDownLookup = {
+    LEFTBUTTON = 1,
+    RIGHTBUTTON = 2,
+    MIDDLEBUTTON = 3,
+    MOUSE4 = 4,
+    MOUSE5 = 5,
+}
+local keyboardDownLookup = {
+
+}
 function Engine:IsKeyDown(keyName)
-    return false -- self._IsKeyDown(keyName)
+    if keyName == "WHEELUP" then
+        error(keyName)
+        return self._currentMouseDown == "up"
+    elseif keyName == "WHEELDOWN" then
+        return self._currentMouseDown == "down"
+    end
+
+    local mouseLookup = mouseDownLookup[keyName]
+
+    if mouseLookup then
+        return love.mouse.isDown(mouseLookup)
+    end
+    return false
 end
 function Engine:Copy(text)
     return self._Copy(text)
@@ -86,10 +108,101 @@ function Engine:IsSubScriptRunning(ssID)
     return self._:IsSubScriptRunning(ssID)
 end
 
+function Engine:RenderFrame()
+    if self._mouseWheel > 0 then
+        self._currentMouseDown = "up"
+    elseif self._mouseWheel < 0 then
+        self._currentMouseDown = "down"
+    else
+        self._currentMouseDown = nil
+    end
+
+    self._mouseWheel = 0
+end
+
+local keyLookups = {
+    tab = "TAB",
+    ["return"] = "RETURN",
+    escape = "ESCAPE",
+    lshift = "SHIFT",
+    rshift = "SHIFT",
+    lctrl = "CTRL",
+    rctrl = "CTRL",
+    lalt = "ALT",
+    ralt = "ALT",
+    pause = "PAUSE",
+    pageup = "PAGEUP",
+    pagedown = "PAGEDOWN",
+    ["end"] = "END",
+    home = "HOME",
+    printscreen = "PRINTSCREEN",
+    insert = "INSERT",
+    f1 = "F1",
+    f2 = "F2",
+    f3 = "F3",
+    f4 = "F4",
+    f5 = "F5",
+    f6 = "F6",
+    f7 = "F7",
+    f8 = "F8",
+    f9 = "F9",
+    f10 = "F10",
+    f11 = "F11",
+    f12 = "F12",
+    f14 = "F14",
+    f15 = "F15",
+    numlock = "NUMLOCK",
+    scrolllock = "SCROLLLOCK",
+}
+
+local mouseLookups = {
+    "LEFTBUTTON",
+    "RIGHTBUTTON",
+    "MIDDLEBUTTON",
+    "MOUSE4",
+    "MOUSE5",
+}
+
 function Engine:Start()
     if self._hasStarted then
         error("already started")
     end
+
+    function love.wheelmoved(x, y)
+        self._mouseWheel = self._mouseWheel + y
+        if y < 0 then
+            callbacks:Run("OnKeyDown", "WHEELDOWN")
+            callbacks:Run("OnKeyUp", "WHEELDOWN")
+        elseif y > 0 then
+            callbacks:Run("OnKeyDown", "WHEELUP")
+            callbacks:Run("OnKeyUp", "WHEELUP")
+        end
+    end
+
+    function love.keypressed(key, scanCode, isRepeat)
+        if not isRepeat and keyLookups[key] then
+            callbacks:Run("OnKeyDown", keyLookups[key])
+        end
+    end
+
+    function love.keyreleased(key, scanCode)
+        if not isRepeat and keyLookups[key] then
+            callbacks:Run("OnKeyUp", keyLookups[key])
+        end
+    end
+
+    function love.mousepressed(x, y, button, isTouch, presses)
+        if mouseLookups[button] then
+            callbacks:Run("OnKeyDown", mouseLookups[button], presses > 1)
+        end
+    end
+
+    function love.mousereleased(x, y, button, isTouch, presses)
+        if mouseLookups[button] then
+            callbacks:Run("OnKeyUp", mouseLookups[button], presses > 1)
+        end
+    end
+
     self._hasStarted = true
     callbacks:Run("OnInit")
 end
@@ -97,6 +210,7 @@ end
 return {
     New = function()
         return setmetatable({
+            _mouseWheel = 0,
             _NewFileSearch = NewFileSearch,
             _SetWindowTitle = love.window.setTitle,
             _ShowCursor = love.mouse.setVisible,

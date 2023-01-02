@@ -413,6 +413,7 @@ return {
                 return
             end
 
+            engine:RenderFrame()
             newObject:RenderFrame()
         end
 
