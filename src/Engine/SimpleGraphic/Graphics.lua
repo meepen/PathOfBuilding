@@ -124,7 +124,7 @@ function Graphics:SplitColoredText(text)
     return result
 end
 function Graphics:StripEscapes(text)
-	return (text:gsub("^%d",""):gsub("^x%x%x%x%x%x%x",""))
+	return (text:gsub("%^%d",""):gsub("%^[xX]%x%x%x%x%x%x",""))
 end
 
 return {
