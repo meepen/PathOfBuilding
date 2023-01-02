@@ -118,6 +118,37 @@ function Engine:RenderFrame()
     end
 
     self._mouseWheel = 0
+
+    if self._showDebugStats then
+        local stats = love.graphics.getStats()
+        local height = 24
+        local font = "VAR"
+        local statsText = string.format(
+            "FPS: %.2f\n" ..
+            "Draws: %i\n" ..
+            "Canvas Switches: %i\n" ..
+            "Texture Memory (MB): %i\n" ..
+            "Images Loaded: %i\n" ..
+            "Canvases: %i\n" ..
+            "Fonts: %i\n" ..
+            "Shader Switches: %i\n" ..
+            "Draw Calls Batched: %i",
+            love.timer.getFPS(),
+            stats.drawcalls,
+            stats.canvasswitches,
+            stats.texturememory / 1024,
+            stats.images,
+            stats.canvases,
+            stats.fonts,
+            stats.shaderswitches,
+            stats.drawcallsbatched
+        )
+        local width = graphics:DrawStringWidth(height, font, statsText)
+        graphics:SetDrawColor(0, 0, 0, 0.5)
+        graphics:DrawImage(nil, 0, 0, width + 10, (select(2, graphics:GetScreenSize())))
+        graphics:SetDrawColor(1, 1, 1, 1)
+        graphics:DrawString(5, 5, "LEFT", height, font, statsText)
+    end
 end
 
 local keyLookups = {
@@ -181,7 +212,9 @@ function Engine:Start()
 
     function love.keypressed(key, scanCode, isRepeat)
         if not isRepeat then
-            if key == "f9" then
+            if key == "f8" then
+                self._showDebugStats = not self._showDebugStats
+            elseif key == "f9" then
                 profile.start()
             elseif key == "f10" then
                 profile.stop()

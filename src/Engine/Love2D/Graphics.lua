@@ -91,12 +91,73 @@ function Graphics:DrawImage(img, left, top, width, height, tcLeft, tcTop, tcRigh
     end
 end
 
-Graphics._mesh = love.graphics.newMesh({
-    { 0, 0, 0, 0 },
-    { 1, 0, 1, 0 },
-    { 1, 1, 1, 1 },
-    { 0, 1, 0, 1 },
-}, "fan", "stream")
+local function memoizeLookupTable(...)
+    local args = { n = select("#", ...) - 1, ... }
+    local __index = args[args.n + 1]
+    local argumentIndex = {}
+    local indexIndex = {}
+    local nilIndex = {}
+
+    local function copyAndAdd(t, k, v)
+        local result = {}
+        for k, v in pairs(t) do
+            result[k] = v
+        end
+        result[k] = v
+        return result
+    end
+
+    local memoizeMt 
+    memoizeMt = {
+        __index = function(self, k)
+            if k == nil then
+                local v = rawget(self, nilIndex)
+                if v ~= nil then
+                    return v
+                end
+            end
+            local memoizedArgs = copyAndAdd(
+                self[argumentIndex],
+                args[self[indexIndex]],
+                k
+            )
+            if k == nil then
+                k = nilIndex
+            end
+            local value
+            if (self[indexIndex] == args.n) then
+                value = __index(memoizedArgs)
+            else
+                value = setmetatable({
+                    [argumentIndex] = memoizedArgs,
+                    [indexIndex] = self[indexIndex] + 1
+                }, memoizeMt)
+            end
+            self[k] = value
+            return value
+        end
+    }
+    local memoized = setmetatable({
+        [argumentIndex] = {},
+        [indexIndex] = 1
+    }, memoizeMt)
+
+    return memoized
+end
+
+Graphics._meshLookup = memoizeLookupTable("img", function(args)
+    local mesh = love.graphics.newMesh({
+        { 0, 0, 0, 0 },
+        { 1, 0, 1, 0 },
+        { 1, 1, 1, 1 },
+        { 0, 1, 0, 1 },
+    }, "fan", "stream")
+
+    if args.img then
+        mesh:setTexture(args.img.handle)
+    end
+    return mesh
+end)
 
 function Graphics:DrawImageQuad(img, x1, y1, x2, y2, x3, y3, x4, y4, s1, t1, s2, t2, s3, t3, s4, t4)
     if not s1 then
@@ -107,16 +168,12 @@ function Graphics:DrawImageQuad(img, x1, y1, x2, y2, x3, y3, x4, y4, s1, t1, s2,
             0, 1
     end
 
-    local _mesh = self._mesh
+    local _mesh = self._meshLookup[img]
     
     _mesh:setVertex(1, x1, y1, s1, t1)
     _mesh:setVertex(2, x2, y2, s2, t2)
     _mesh:setVertex(3, x3, y3, s3, t3)
     _mesh:setVertex(4, x4, y4, s4, t4)
-
-    if img then
-        _mesh:setTexture(img.handle)
-    end
 
     love.graphics.draw(_mesh)
 end
@@ -262,10 +319,16 @@ function Graphics:SetDrawLayer(layer, subLayer)
     if not subLayer then
         subLayer = 0
     end
-    local layer = self._layerLookup[layer][subLayer]
-    love.graphics.setCanvas(layer.canvas)
-    if layer._lastFrame ~= self.frame then
-        layer._lastFrame = self.frame
+    local activeLayer = self._layerLookup[layer][subLayer]
+
+    if activeLayer == self._activeLayer then
+        return
+    end
+    self._activeLayer = activeLayer
+
+    love.graphics.setCanvas(activeLayer.canvas)
+    if activeLayer._lastFrame ~= self.frame then
+        activeLayer._lastFrame = self.frame
         love.graphics.clear(0, 0, 0, 0)
         self:SetViewport()
     end
@@ -278,6 +341,9 @@ function Graphics:SetViewport(x, y, width, height)
         love.graphics.push()
             love.graphics.translate(x, y)
     end
+    if width then
+        -- todo: stencil
+    end
 end
 
 function Graphics:RenderFrame()
@@ -285,9 +351,15 @@ function Graphics:RenderFrame()
     if self._lastWidth ~= width or self._lastHeight ~= height then
         self._lastWidth, self._lastHeight = width, height
 
+        for _, layer in ipairs(self._layers) do
+            layer.canvas:release()
+        end
+
         self._layers = {}
         for k in pairs(self._layerLookup) do
-            self._layerLookup[k] = nil
+            if type(k) == "number" then
+                self._layerLookup[k] = nil
+            end
         end
     end
 
@@ -322,19 +394,6 @@ end
 return {
     New = function()
         local newObject
-        local subLayerMetatable = {
-            __index = function(self, subLayer)
-                local newLayer = {
-                    canvas = love.graphics.newCanvas(),
-                    layer = self.layer,
-                    subLayer = subLayer
-                }
-                self[subLayer] = newLayer
-                table.insert(newObject._layers, newLayer)
-                table.sort(newObject._layers, canvasSorter)
-                return newLayer
-            end
-        }
         newObject = setmetatable({
             frame = 0,
             _screenState = {
@@ -343,19 +402,28 @@ return {
                 resizable = true,
             },
             _layers = {},
-            _layerLookup = setmetatable({}, {
-                __index = function(self, layer)
-                    local sublayerLookup = setmetatable({layer = layer}, subLayerMetatable)
-                    self[layer] = sublayerLookup
-                    return sublayerLookup
+            _layerLookup = memoizeLookupTable("layer", "subLayer", function(args)
+                local newLayer = {
+                    canvas = love.graphics.newCanvas(),
+                    layer = args.layer,
+                    subLayer = args.subLayer,
+                }
+                if not args.layer then
+                    error "wtf"
                 end
-            }),
+                if not args.subLayer then
+                    error "wtf2"
+                end
+                table.insert(newObject._layers, newLayer)
+                table.sort(newObject._layers, canvasSorter)
+
+                return newLayer
+            end),
             _clearColor = {1, 0, 0, 1},
             _GetScreenSize   = love.graphics.getDimensions,
             _SetDrawColor    = love.graphics.setColor,
         }, GraphicsMt)
 
-        
         function love.draw()
             love.graphics.setMeshCullMode("none")
             love.graphics.setDepthMode()
@@ -363,8 +431,8 @@ return {
                 return
             end
 
-            engine:RenderFrame()
             newObject:RenderFrame()
+            engine:RenderFrame()
         end
 
         return newObject
