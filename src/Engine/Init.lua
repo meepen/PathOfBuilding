@@ -22,7 +22,7 @@ function PLoadModule(fileName, ...)
 	end
 end
 function PCall(func, ...)
-	local ret = { pcall(func, ...) }
+	local ret = { xpcall(func, debug.traceback, ...) }
 	if ret[1] then
 		table.remove(ret, 1)
 		return nil, unpack(ret)

@@ -30,12 +30,14 @@ local memoizedColors = setmetatable({}, {
         if bytes[1] == 0x5E then -- '^'
             local nextByte = bytes[2]
             if nextByte == 0x58 or nextByte == 0x78 then -- 'X' or 'x'
-                col = {
-                    tonumber(str:sub(2, 3), 16) / 255, -- r
-                    tonumber(str:sub(4, 5), 16) / 255, -- g
-                    tonumber(str:sub(6, 7), 16) / 255, -- b
-                    1, -- a
-                }    
+                if str:sub(2, 7):match("^[a-fA-F0-9]+$") then
+                    col = {
+                        tonumber(str:sub(2, 3), 16) / 255, -- r
+                        tonumber(str:sub(4, 5), 16) / 255, -- g
+                        tonumber(str:sub(6, 7), 16) / 255, -- b
+                        1, -- a
+                    }
+                end
             elseif nextByte - 0x30 < 10 then -- '0'
                 col = Graphics._ColorEscapes[nextByte - 0x30]
             end
@@ -178,15 +180,17 @@ function Graphics:DrawString(left, top, align, height, font, text)
     local fontObject = love.graphics.getFont()
 
     if align == "CENTER" then
-        local totalWidth = fontObject:getWidth(self:StripEscapes(text))
-        left = left - totalWidth / 2
-        top = top - height / 2
+        local screenWidth = self:GetScreenSize()
+        left = math.floor((screenWidth - fontObject:getWidth(self:StripEscapes(text))) / 2 + left)
+    elseif align == "RIGHT" then
+        local screenWidth = self:GetScreenSize()
+        left = math.floor(screenWidth - fontObject:getWidth(self:StripEscapes(text)) - left)
     elseif align == "CENTER_X" then
         local totalWidth = fontObject:getWidth(self:StripEscapes(text))
-        left = left - totalWidth / 2
+        left = math.floor(left - totalWidth / 2)
     elseif align == "RIGHT_X" then
         local totalWidth = fontObject:getWidth(self:StripEscapes(text))
-        left = left - totalWidth
+        left = math.floor(left - totalWidth)
     elseif align and align ~= "LEFT" and align ~= "LEFT_X" then
         error("unsupported alignment: " .. align)
     end
@@ -258,7 +262,7 @@ function Graphics:SplitColoredText(text)
     while i <= textLen do
         if bytes[i] == 0x5E then -- '^'
             local nextByte = bytes[i + 1]
-            if nextByte == 0x58 or nextByte == 0x78 then -- 'X' or 'x'
+            if (nextByte == 0x58 or nextByte == 0x78) and text:sub(i + 2, i + 7):match("^[a-fA-F0-9]+$") then -- 'X' or 'x'
                 -- add last characters
                 result[resultLen + 1], result[resultLen + 2], resultLen =
                     text:sub(lastSplit, i - 1), 
@@ -328,7 +332,6 @@ function Graphics:SetViewport(x, y, width, height)
 end
 
 function Graphics:RenderFrame()
-
     local width, height = self:GetScreenSize()
     if self._lastWidth ~= width or self._lastHeight ~= height then
         self._lastWidth, self._lastHeight = width, height
