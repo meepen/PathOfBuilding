@@ -307,7 +307,7 @@ function Graphics:SplitColoredText(text)
 end
 
 function Graphics:StripEscapes(text)
-	return (tostring(text):gsub("^%d",""):gsub("^x%x%x%x%x%x%x",""))
+	return (tostring(text):gsub("%^%d",""):gsub("%^[xX]%x%x%x%x%x%x",""))
 end
 
 function Graphics:SetDrawLayer(layer, subLayer)
