@@ -29,18 +29,20 @@ local memoizedColors = setmetatable({}, {
         local col
         if bytes[1] == 0x5E then -- '^'
             local nextByte = bytes[2]
-            if nextByte == 0x58 or nextByte == 0x78 then -- 'X' or 'x'
-                if str:sub(2, 7):match("^[a-fA-F0-9]+$") then
-                    col = {
-                        tonumber(str:sub(2, 3), 16) / 255, -- r
-                        tonumber(str:sub(4, 5), 16) / 255, -- g
-                        tonumber(str:sub(6, 7), 16) / 255, -- b
-                        1, -- a
-                    }
-                end
-            elseif nextByte - 0x30 < 10 then -- '0'
+            if (nextByte == 0x58 or nextByte == 0x78) and str:len() == 8 then
+                col = {
+                    tonumber(str:sub(3, 4), 16) / 255, -- r
+                    tonumber(str:sub(5, 6), 16) / 255, -- g
+                    tonumber(str:sub(7, 8), 16) / 255, -- b
+                    1, -- a
+                }
+            elseif nextByte - 0x30 < 10 and str:len() == 2 then -- '0'
                 col = Graphics._ColorEscapes[nextByte - 0x30]
             end
+        end
+
+        if not col then
+            error((str:gsub(".", function(a) return string.format("%02x", a:byte()) end)))
         end
 
         self[str] = col
@@ -53,9 +55,6 @@ local memoizedColors = setmetatable({}, {
 function Graphics:SetDrawColor(r, g, b, a)
     if type(r) == "string" then
         r = memoizedColors[r]
-    end
-
-    if type(r) == "table" then
         r, g, b, a = r[1], r[2], r[3], r[4]
     end
 
@@ -262,7 +261,8 @@ function Graphics:SplitColoredText(text)
     while i <= textLen do
         if bytes[i] == 0x5E then -- '^'
             local nextByte = bytes[i + 1]
-            if (nextByte == 0x58 or nextByte == 0x78) and text:sub(i + 2, i + 7):match("^[a-fA-F0-9]+$") then -- 'X' or 'x'
+            if (nextByte == 0x58 or nextByte == 0x78) and -- 'X' or 'x'
+                string.len(text:sub(i + 2, i + 7):match("^[a-fA-F0-9]+$") or "") == 6 then 
                 -- add last characters
                 result[resultLen + 1], result[resultLen + 2], resultLen =
                     text:sub(lastSplit, i - 1), 
