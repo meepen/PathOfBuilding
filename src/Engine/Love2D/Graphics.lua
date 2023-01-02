@@ -91,46 +91,6 @@ function Graphics:DrawImage(img, left, top, width, height, tcLeft, tcTop, tcRigh
     end
 end
 
-local function memoizeLookupTable(...)
-    local args = { n = select("#", ...) - 1, ... }
-    local __index = args[args.n + 1]
-    local argumentIndex = {}
-    local indexIndex = {}
-
-    local function copyAndAdd(t, k, v)
-        local result = {}
-        for k, v in pairs(t) do
-            result[k] = v
-        end
-        result[k] = v
-        return result
-    end
-
-    local memoizeMt 
-    memoizeMt = {
-        __index = function(self, k)
-            local memoizedArgs = copyAndAdd(self[argumentIndex], args[self[indexIndex]], k)
-            local value
-            if (self[indexIndex] == args.n) then
-                value = __index(memoizedArgs)
-            else
-                value = setmetatable({
-                    [argumentIndex] = memoizedArgs,
-                    [indexIndex] = self[indexIndex] + 1
-                }, memoizeMt)
-            end
-            self[k] = value
-            return value
-        end
-    }
-    local memoized = setmetatable({
-        [argumentIndex] = {},
-        [indexIndex] = 1
-    }, memoizeMt)
-
-    return memoized
-end
-
 Graphics._mesh = love.graphics.newMesh({
     { 0, 0, 0, 0 },
     { 1, 0, 1, 0 },
