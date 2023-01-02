@@ -62,22 +62,116 @@ end
 function Graphics:DrawImage(img, left, top, width, height, tcLeft, tcTop, tcRight, tcBottom)
     if img then
         local sx, sy = 1, 1
+        local realWidth, realHeight = img:ImageSize()
         if width and height and width ~= 0 then
-            local realWidth, realHeight = img:ImageSize()
             if realWidth ~= 0 then
                 sx = width / realWidth
                 sy = height / realHeight
             end
         end
 
-        love.graphics.draw(img.handle, left, top, 0, sx, sy)
+        if tcLeft then
+            self:DrawImageQuad(
+                img, 
+                left, top, 
+                left + width, top, 
+                left + width, top + height, 
+                left, top + height,
+                (tcLeft) / realWidth, (tcTop) / realHeight,
+                tcRight / realWidth, (tcTop) / realHeight,
+                tcRight / realWidth, tcBottom / realHeight,
+                (tcLeft) / realWidth, tcBottom / realHeight
+            )
+        else
+            love.graphics.draw(img.handle, left, top, 0, sx, sy)
+        end
     else
         love.graphics.rectangle("fill", left, top, width, height)
     end
-    --return self._DrawImage(img and img.handle or nil, left, top, width, height, tcLeft, tcTop, tcRight, tcBottom)
 end
+
+local function memoizeLookupTable(...)
+    local args = { n = select("#", ...) - 1, ... }
+    local __index = args[args.n + 1]
+    local argumentIndex = {}
+    local indexIndex = {}
+
+    local function copyAndAdd(t, k, v)
+        local result = {}
+        for k, v in pairs(t) do
+            result[k] = v
+        end
+        result[k] = v
+        return result
+    end
+
+    local memoizeMt 
+    memoizeMt = {
+        __index = function(self, k)
+            local memoizedArgs = copyAndAdd(self[argumentIndex], args[self[indexIndex]], k)
+            local value
+            if (self[indexIndex] == args.n) then
+                value = __index(memoizedArgs)
+            else
+                value = setmetatable({
+                    [argumentIndex] = memoizedArgs,
+                    [indexIndex] = self[indexIndex] + 1
+                }, memoizeMt)
+            end
+            self[k] = value
+            return value
+        end
+    }
+    local memoized = setmetatable({
+        [argumentIndex] = {},
+        [indexIndex] = 1
+    }, memoizeMt)
+
+    return memoized
+end
+
+Graphics._memoizedMeshes = memoizeLookupTable(
+    "x1",
+    "y1",
+    "x2",
+    "y2",
+    "x3",
+    "y3",
+    "x4",
+    "y4",
+    "s1",
+    "t1",
+    "s2",
+    "t2",
+    "s3",
+    "t3",
+    "s4",
+    "t4",
+    function(args)
+        return love.graphics.newMesh({
+            { args.x1, args.y1, args.s1, args.t1 },
+            { args.x2, args.y2, args.s2, args.t2 },
+            { args.x3, args.y3, args.s3, args.t3 },
+            { args.x4, args.y4, args.s4, args.t4 },
+        })
+    end
+)
+
 function Graphics:DrawImageQuad(img, x1, y1, x2, y2, x3, y3, x4, y4, s1, t1, s2, t2, s3, t3, s4, t4)
-    --return self._DrawImageQuad(img and img.handle or nil, x1, y1, x2, y2, x3, y3, x4, y4, s1, t1, s2, t2, s3, t3, s4, t4)
+    if not s1 then
+        s1, t1, s2, t2, s3, t3, s4, t4 = 
+            0, 0,
+            1, 0,
+            1, 1,
+            0, 1
+    end
+    local mesh = self._memoizedMeshes[x1][y1][x2][y2][x3][y3][x4][y4][s1][t1][s2][t2][s3][t3][s4][t4]
+
+    if img then
+        mesh:setTexture(img.handle)
+    end
+
+    love.graphics.draw(mesh)
 end
 function Graphics:DrawString(left, top, align, height, font, text)
     local r, g, b, a = love.graphics.getColor()

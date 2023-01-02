@@ -1,4 +1,4 @@
-#@
+
 -- This wrapper allows the program to run headless on any OS (in theory)
 -- It can be run using a standard lua interpreter, although LuaJIT is preferable
 
@@ -130,7 +130,7 @@ function PLoadModule(fileName, ...)
 	end
 end
 function PCall(func, ...)
-	local ret = { pcall(func, ...) }
+	local ret = { xpcall(func, debug.traceback, ...) }
 	if ret[1] then
 		table.remove(ret, 1)
 		return nil, unpack(ret)
@@ -168,8 +168,8 @@ dofile("Launch.lua")
 -- The CI env var will be true when run from github workflows but should be false for other tools using the headless wrapper 
 mainObject.continuousIntegrationMode = os.getenv("CI") 
 
-runCallback("OnInit")
-runCallback("OnFrame") -- Need at least one frame for everything to initialise
+callbacks:Run("OnInit")
+callbacks:Run("OnFrame") -- Need at least one frame for everything to initialise
 
 if mainObject.promptMsg then
 	-- Something went wrong during startup
@@ -184,15 +184,15 @@ build = mainObject.main.modes["BUILD"]
 -- Here's some helpful helper functions to help you get started
 function newBuild()
 	mainObject.main:SetMode("BUILD", false, "Help, I'm stuck in Path of Building!")
-	runCallback("OnFrame")
+	callbacks:Run("OnFrame")
 end
 function loadBuildFromXML(xmlText, name)
 	mainObject.main:SetMode("BUILD", false, name or "", xmlText)
-	runCallback("OnFrame")
+	callbacks:Run("OnFrame")
 end
 function loadBuildFromJSON(getItemsJSON, getPassiveSkillsJSON)
 	mainObject.main:SetMode("BUILD", false, "")
-	runCallback("OnFrame")
+	callbacks:Run("OnFrame")
 	local charData = build.importTab:ImportItemsAndSkills(getItemsJSON)
 	build.importTab:ImportPassiveTreeAndJewels(getPassiveSkillsJSON, charData)
 	-- You now have a build without a correct main skill selected, or any configuration options set
