@@ -9,7 +9,7 @@ describe("TetsItemMods", function()
 
     it("Dialla's socket mods", function()
         build.skillsTab:PasteSocketGroup("Slot: Body Armour\nArc 20/0 Default  1\nArc 20/0 Default  1\n")
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
 
         build.itemsTab:CreateDisplayItemFromRaw([[Dialla's Malefaction
         Sage's Robe
@@ -32,7 +32,7 @@ describe("TetsItemMods", function()
         {variant:2}Gems Socketed in Blue Sockets gain 100% increased Experience
         Has no Attribute Requirements]])
         build.itemsTab:AddDisplayItem()
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
 
         assert.are.equals(build.calcsTab.mainEnv.player.activeSkillList[1].activeEffect.level, 22)
         assert.are.equals(build.calcsTab.mainEnv.player.activeSkillList[2].activeEffect.quality, 30)
@@ -57,12 +57,12 @@ describe("TetsItemMods", function()
         All Sockets are White
         Socketed Gems have Elemental Equilibrium]])
         build.itemsTab:AddDisplayItem()
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
 
         local lightningResBefore = build.calcsTab.mainOutput.LightningResist
 
         build.skillsTab:PasteSocketGroup("Slot: Ring 1\nWrath 20/0 Default  1\n")
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
 
         assert.are_not.equals(lightningResBefore, build.calcsTab.mainOutput.LightningResist)
     end)
@@ -94,10 +94,10 @@ describe("TetsItemMods", function()
         {variant:5,4}Attack Skills gain 5% of Physical Damage as Extra Fire Damage per Socketed Red Gem
         {variant:5,4}You have Vaal Pact while all Socketed Gems are Red]])
         build.itemsTab:AddDisplayItem()
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
 
         build.skillsTab:PasteSocketGroup("Slot: Weapon 1\nSmite 20/0 Default  1\n")
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
 
         assert.is_true(build.calcsTab.mainEnv.keystonesAdded["Vaal Pact"])
         assert.is_true(build.calcsTab.mainEnv.player.mainSkill.skillModList:Sum("BASE", build.calcsTab.mainEnv.player.mainSkill.skillCfg, "PhysicalDamageGainAsFire") > 0)
@@ -122,15 +122,15 @@ describe("TetsItemMods", function()
         {range:0.5}+(2-3) Mana gained for each Enemy hit by Attacks
         Counts as all One Handed Melee Weapon Types]])
         build.itemsTab:AddDisplayItem()
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
 
         build.skillsTab:PasteSocketGroup("Smite 20/0 Default  1\nNightblade 20/0 Default  1\n")
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
         local nonElusiveCritMult = build.calcsTab.mainOutput.CritMultiplier
 
         build.configTab.input["buffElusive"] = true
         build.configTab:BuildModList()
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
 
         assert.are_not.equals(nonElusiveCritMult, build.calcsTab.mainOutput.CritMultiplier)
     end)
@@ -154,20 +154,20 @@ describe("TetsItemMods", function()
         {range:0.5}+(2-3) Mana gained for each Enemy hit by Attacks
         Counts as all One Handed Melee Weapon Types]])
         build.itemsTab:AddDisplayItem()
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
 
         build.configTab.input["meleeDistance"] = 99
         build.configTab:BuildModList()
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
 
         build.skillsTab:PasteSocketGroup("Cyclone 20/0 Default  1\nClose Combat 20/0 Default  1\n")
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
 
         local farDPS = build.calcsTab.mainOutput.TotalDPS
 
         build.configTab.input["meleeDistance"] = 1
         build.configTab:BuildModList()
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
 
         assert.are_not.equals(farDPS, build.calcsTab.mainOutput.TotalDPS)
     end)
@@ -182,7 +182,7 @@ describe("TetsItemMods", function()
         Implicits: 0
         +30 to Intelligence]])
         build.itemsTab:AddDisplayItem()
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
 
         local genericRingInt = build.calcsTab.mainOutput.Int
 
@@ -193,7 +193,7 @@ describe("TetsItemMods", function()
         Reflects your other Ring
         Mirrored]])
         build.itemsTab:AddDisplayItem()
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
 
         assert.are.equals(genericRingInt - initialInt, build.calcsTab.mainOutput.Int - genericRingInt)
     end)

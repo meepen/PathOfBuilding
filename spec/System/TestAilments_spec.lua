@@ -10,13 +10,13 @@ describe("TestAilments", function()
     it("maximum shock value", function()
         -- Shock Nova
         build.skillsTab:PasteSocketGroup("Slot: Weapon 1\nShock Nova 4/0 Default  1\n")
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
         assert.are.equals(round(50 + 10), build.calcsTab.mainOutput.MaximumShock)
 
         -- Voltaxic Rift
         build.itemsTab:CreateDisplayItemFromRaw("New Item\nAssassin Bow\n+40% to Maximum Effect of Shock")
         build.itemsTab:AddDisplayItem()
-        runCallback("OnFrame")
+        callbacks:Run("OnFrame")
         assert.are.equals(round(50 + 10 + 40), build.calcsTab.mainOutput.MaximumShock)
     end)
 end)

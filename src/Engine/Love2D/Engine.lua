@@ -1,6 +1,4 @@
-local Engine = {
-    curl = require("lcurl.safe"),
-}
+local Engine = {}
 local EngineMt = { __index = Engine }
 
 function Engine:NewFileSearch(spec, includeFolders)
@@ -12,7 +10,7 @@ function Engine:SetWindowTitle(title)
     return self._SetWindowTitle(title)
 end
 function Engine:GetCursorPos()
-	return self._GetCursorPos()
+	return love.mouse.getPosition()
 end
 function Engine:ShowCursor(doShow)
     return self._ShowCursor(doShow)
@@ -29,7 +27,7 @@ end
     "NUMLOCK", "SCROLLLOCK",
 ]]
 function Engine:IsKeyDown(keyName)
-    return self._IsKeyDown(keyName)
+    return false -- self._IsKeyDown(keyName)
 end
 function Engine:Copy(text)
     return self._Copy(text)
@@ -88,29 +86,36 @@ function Engine:IsSubScriptRunning(ssID)
     return self._:IsSubScriptRunning(ssID)
 end
 
+function Engine:Start()
+    if self._hasStarted then
+        error("already started")
+    end
+    self._hasStarted = true
+    callbacks:Run("OnInit")
+end
+
 return {
     New = function()
         return setmetatable({
             _NewFileSearch = NewFileSearch,
-            _SetWindowTitle = SetWindowTitle,
-            _GetCursorPos = GetCursorPos,
-            _ShowCursor = ShowCursor,
+            _SetWindowTitle = love.window.setTitle,
+            _ShowCursor = love.mouse.setVisible,
             _IsKeyDown = IsKeyDown,
-            _Copy = Copy,
-            _Paste = Paste,
+            _Copy = love.system.getClipboardText,
+            _Paste = love.system.setClipboardText,
             _Inflate = Inflate,
             _Deflate = Deflate,
-            _GetTime = GetTime,
-            _GetScriptPath = GetScriptPath,
-            _GetRuntimePath = GetRuntimePath,
-            _GetUserPath = GetUserPath,
-            _MakeDir = MakeDir,
-            _RemoveDir = RemoveDir,
-            _GetWorkDir = GetWorkDir,
+            _GetTime = function() return math.floor(love.timer.getTime() * 1000) end,
+            _GetScriptPath = love.filesystem.getWorkingDirectory,
+            _GetRuntimePath = love.filesystem.getWorkingDirectory,
+            _GetUserPath = love.filesystem.getUserDirectory,
+            _MakeDir = love.filesystem.createDirectory,
+            _RemoveDir = love.filesystem.remove,
+            _GetWorkDir = love.filesystem.getWorkingDirectory,
             _SpawnProcess = SpawnProcess,
             _OpenURL = OpenURL,
-            _Restart = Restart,
-            _Exit = Exit,
+            _Restart = function() love.event.quit("restart") end,
+            _Exit = function() love.event.quit() end,
             _LaunchSubScript = LaunchSubScript,
         }, EngineMt)
     end,

@@ -10,7 +10,7 @@ ConExecute("set vid_mode 8")
 ConExecute("set vid_resizable 3")
 
 launch = { }
-SetMainObject(launch)
+callbacks:SetMainObject(launch)
 
 function launch:OnInit()
 	self.devMode = true

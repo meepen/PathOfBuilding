@@ -14,7 +14,7 @@ ConExecute("set vid_mode 8")
 ConExecute("set vid_resizable 3")
 
 launch = { }
-SetMainObject(launch)
+callbacks:SetMainObject(launch)
 
 function launch:OnInit()
 	self.devMode = false
@@ -387,4 +387,8 @@ function launch:DrawPopup(r, g, b, fmt, ...)
 	graphics:SetDrawColor(1, 1, 1)
 	graphics:DrawImage(nil, ox + 4, oy + 4, w - 8, h - 8)
 	graphics:DrawString(0, oy + 10, "CENTER", 20, "VAR", txt)
+end
+
+if engine.Start then
+	engine:Start()
 end

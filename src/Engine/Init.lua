@@ -40,14 +40,26 @@ function ConClear() end
 function SetProfiling(isEnabled) end
 
 local engineVar = (os.getenv("POB_ENGINE") or "SimpleGraphic")
-if (engineVar == "SimpleGraphic") then
-	local EngineClass = require("Engine.SimpleGraphic.Engine")
-	local GraphicsClass = require("Engine.SimpleGraphic.Graphics")
-	local ImageClass = require("Engine.SimpleGraphic.Image")
+if love then
+	local EngineClass = require("Engine.Love2D.Engine")
+	local GraphicsClass = require("Engine.Love2D.Graphics")
+	local ImageClass = require("Engine.Love2D.Image")
+	local CallbacksClass = require("Engine.Callbacks")
 
 	engine = EngineClass.New()
 	graphics = GraphicsClass.New()
 	Image = ImageClass
+	callbacks = CallbacksClass.New()
+elseif engineVar == "SimpleGraphic" then
+	local EngineClass = require("Engine.SimpleGraphic.Engine")
+	local GraphicsClass = require("Engine.SimpleGraphic.Graphics")
+	local ImageClass = require("Engine.SimpleGraphic.Image")
+	local CallbacksClass = require("Engine.SimpleGraphic.Callbacks")
+
+	engine = EngineClass.New()
+	graphics = GraphicsClass.New()
+	Image = ImageClass
+	callbacks = CallbacksClass.New()
 else
 	error("Unknown engine: " .. engineVar)
 end
@@ -61,8 +73,8 @@ dofile("Launch.lua")
 -- The CI env var will be true when run from github workflows but should be false for other tools using the headless wrapper 
 mainObject.continuousIntegrationMode = os.getenv("CI") 
 
-runCallback("OnInit")
-runCallback("OnFrame") -- Need at least one frame for everything to initialise
+callbacks:Run("OnInit")
+callbacks:Run("OnFrame") -- Need at least one frame for everything to initialise
 
 if mainObject.promptMsg then
 	-- Something went wrong during startup
@@ -77,15 +89,15 @@ build = mainObject.main.modes["BUILD"]
 -- Here's some helpful helper functions to help you get started
 function newBuild()
 	mainObject.main:SetMode("BUILD", false, "Help, I'm stuck in Path of Building!")
-	runCallback("OnFrame")
+	callbacks:Run("OnFrame")
 end
 function loadBuildFromXML(xmlText, name)
 	mainObject.main:SetMode("BUILD", false, name or "", xmlText)
-	runCallback("OnFrame")
+	callbacks:Run("OnFrame")
 end
 function loadBuildFromJSON(getItemsJSON, getPassiveSkillsJSON)
 	mainObject.main:SetMode("BUILD", false, "")
-	runCallback("OnFrame")
+	callbacks:Run("OnFrame")
 	local charData = build.importTab:ImportItemsAndSkills(getItemsJSON)
 	build.importTab:ImportPassiveTreeAndJewels(getPassiveSkillsJSON, charData)
 	-- You now have a build without a correct main skill selected, or any configuration options set
