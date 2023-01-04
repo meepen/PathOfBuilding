@@ -371,7 +371,8 @@ function Graphics:RenderFrame()
     callbacks:Run("OnFrame")
 
     love.graphics.setCanvas()
-
+    
+    love.graphics.setColor(1, 1, 1, 1)
     for _, layer in ipairs(self._layers) do
         if layer._lastFrame == self.frame then
             love.graphics.draw(layer.canvas)

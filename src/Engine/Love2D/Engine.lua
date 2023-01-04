@@ -1,10 +1,11 @@
 local profile = require("Engine.Love2D.Profiler")
 local LibDeflate = require("Engine.LibDeflate")
+local FileSystem = require("Engine.Love2D.FileSystem").New()
 local Engine = {}
 local EngineMt = { __index = Engine }
 
 function Engine:NewFileSearch(spec, includeFolders)
-    return self._NewFileSearch(spec, includeFolders)
+    return FileSystem:NewSearchHandle(spec, includeFolders)
 end
 
 -- General Functions
