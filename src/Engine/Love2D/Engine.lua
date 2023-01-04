@@ -1,4 +1,5 @@
 local profile = require("Engine.Love2D.Profiler")
+local LibDeflate = require("Engine.LibDeflate")
 local Engine = {}
 local EngineMt = { __index = Engine }
 
@@ -58,10 +59,10 @@ function Engine:Paste()
     return self._Paste()
 end
 function Engine:Deflate(data)
-    return self._Deflate(data)
+    return LibDeflate:CompressZlib(data)
 end
 function Engine:Inflate(data)
-    return self._Inflate(data)
+    return LibDeflate:DecompressZlib(data)
 end
 function Engine:GetTime()
     return self._GetTime()
@@ -99,13 +100,11 @@ end
 
 
 function Engine:LaunchSubScript(scriptText, funcList, subList, ...)
-    return self._LaunchSubScript(scriptText, funcList, subList, ...)
+    -- love.thread
 end
 function Engine:AbortSubScript(ssID)
-    return self._AbortSubScript(ssID)
 end
 function Engine:IsSubScriptRunning(ssID)
-    return self._:IsSubScriptRunning(ssID)
 end
 
 function Engine:RenderFrame()
@@ -253,14 +252,11 @@ return {
     New = function()
         return setmetatable({
             _mouseWheel = 0,
-            _NewFileSearch = NewFileSearch,
+            _NewFileSearch = NewFileSearch, -- TODO
             _SetWindowTitle = love.window.setTitle,
             _ShowCursor = love.mouse.setVisible,
-            _IsKeyDown = IsKeyDown,
-            _Copy = love.system.getClipboardText,
-            _Paste = love.system.setClipboardText,
-            _Inflate = Inflate,
-            _Deflate = Deflate,
+            _Copy = love.system.setClipboardText,
+            _Paste = love.system.getClipboardText,
             _GetTime = function() return math.floor(love.timer.getTime() * 1000) end,
             _GetScriptPath = love.filesystem.getWorkingDirectory,
             _GetRuntimePath = love.filesystem.getWorkingDirectory,
@@ -268,11 +264,10 @@ return {
             _MakeDir = love.filesystem.createDirectory,
             _RemoveDir = love.filesystem.remove,
             _GetWorkDir = love.filesystem.getWorkingDirectory,
-            _SpawnProcess = SpawnProcess,
-            _OpenURL = OpenURL,
+            _SpawnProcess = SpawnProcess, -- TODO
+            _OpenURL = love.system.openURL,
             _Restart = function() love.event.quit("restart") end,
             _Exit = function() love.event.quit() end,
-            _LaunchSubScript = LaunchSubScript,
         }, EngineMt)
     end,
 }
