@@ -215,7 +215,34 @@ function Graphics:DrawStringWidth(height, font, text)
     return fontObject:getWidth(self:StripEscapes(text))
 end
 function Graphics:DrawStringCursorIndex(height, font, text, cursorX, cursorY)
-	--return self._DrawStringCursorIndex(height, font, text, cursorX, cursorY)
+    -- given font height, find which character inside given `text` would be the caret position
+    -- when cursor is clicked at `cursorX` `cursorY`.
+
+    text = self:StripEscapes(text)
+    local fontObject = love.graphics.getFont() -- TODO: get actual font
+
+    local lineY = 0
+    
+    for currentIndex, line in text:gmatch("()([^\n\r]+)") do
+        lineY = lineY + fontObject:getLineHeight()
+
+        if lineY <= cursorY then
+            -- it's on this line, probably...
+
+            -- maybe we should support utf8 here? do we have support anywhere else in PoB?
+
+            for i = 1, line:len() do
+                local width = font:getWidth(line:sub(1, i))
+                if width <= cursorX then
+                    return currentIndex + i - 1
+                end
+            end
+
+            return currentIndex + line:len()
+        end
+    end
+
+    return text:len()
 end
 
 --[[

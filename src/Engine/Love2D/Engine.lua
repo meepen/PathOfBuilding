@@ -136,7 +136,7 @@ function Engine:RenderFrame()
             love.timer.getFPS(),
             stats.drawcalls,
             stats.canvasswitches,
-            stats.texturememory / 1024,
+            stats.texturememory / 1024 / 1024,
             stats.images,
             stats.canvases,
             stats.fonts,
