@@ -179,7 +179,6 @@ function Graphics:DrawImageQuad(img, x1, y1, x2, y2, x3, y3, x4, y4, s1, t1, s2,
 end
 function Graphics:DrawString(left, top, align, height, font, text)
     text = tostring(text)
-    local r, g, b, a = love.graphics.getColor()
     local fontObject = love.graphics.getFont()
 
     if align == "CENTER" then
@@ -206,14 +205,14 @@ function Graphics:DrawString(left, top, align, height, font, text)
             left = left + fontObject:getWidth(data)
         end
     end
-
-    love.graphics.setColor(r, g, b, a)
 end
+
 function Graphics:DrawStringWidth(height, font, text)
     text = tostring(text)
     local fontObject = love.graphics.getFont()
     return fontObject:getWidth(self:StripEscapes(text))
 end
+
 function Graphics:DrawStringCursorIndex(height, font, text, cursorX, cursorY)
     -- given font height, find which character inside given `text` would be the caret position
     -- when cursor is clicked at `cursorX` `cursorY`.

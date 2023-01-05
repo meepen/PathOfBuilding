@@ -132,7 +132,8 @@ function Engine:RenderFrame()
             "Canvases: %i\n" ..
             "Fonts: %i\n" ..
             "Shader Switches: %i\n" ..
-            "Draw Calls Batched: %i",
+            "Draw Calls Batched: %i\n" ..
+            "Debug: %s",
             love.timer.getFPS(),
             stats.drawcalls,
             stats.canvasswitches,
@@ -141,7 +142,8 @@ function Engine:RenderFrame()
             stats.canvases,
             stats.fonts,
             stats.shaderswitches,
-            stats.drawcallsbatched
+            stats.drawcallsbatched,
+            self.debugText or ""
         )
         local width = graphics:DrawStringWidth(height, font, statsText)
         graphics:SetDrawColor(0, 0, 0, 0.5)
