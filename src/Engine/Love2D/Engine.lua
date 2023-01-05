@@ -245,6 +245,10 @@ function Engine:Start()
         end
     end
 
+    function love.textinput(text)
+        callbacks:Run("OnChar", text)
+    end
+
     self._hasStarted = true
     callbacks:Run("OnInit")
 end
@@ -253,7 +257,6 @@ return {
     New = function()
         return setmetatable({
             _mouseWheel = 0,
-            _NewFileSearch = NewFileSearch, -- TODO
             _SetWindowTitle = love.window.setTitle,
             _ShowCursor = love.mouse.setVisible,
             _Copy = love.system.setClipboardText,

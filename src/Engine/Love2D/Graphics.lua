@@ -218,27 +218,36 @@ function Graphics:DrawStringCursorIndex(height, font, text, cursorX, cursorY)
     -- given font height, find which character inside given `text` would be the caret position
     -- when cursor is clicked at `cursorX` `cursorY`.
 
-    text = self:StripEscapes(text)
     local fontObject = love.graphics.getFont() -- TODO: get actual font
 
     local lineY = 0
-    
-    for currentIndex, line in text:gmatch("()([^\n\r]+)") do
+    for currentIndex, line in text:gmatch("()([^\n]+)\n?") do
         lineY = lineY + fontObject:getLineHeight()
 
         if lineY <= cursorY then
-            -- it's on this line, probably...
-
             -- maybe we should support utf8 here? do we have support anywhere else in PoB?
 
-            for i = 1, line:len() do
-                local width = font:getWidth(line:sub(1, i))
-                if width <= cursorX then
-                    return currentIndex + i - 1
+            local split = self:SplitColoredText(line)
+
+            local i = 0
+
+            local currentLine = ""
+            
+            for _, text in ipairs(split) do
+                if type(text) == "table" then
+                    i = i + text.size
+                else
+                    for j = 1, text:len() do
+                        currentLine = currentLine .. text:sub(j, j)
+                        if cursorX <= fontObject:getWidth(currentLine) then
+                            return currentIndex + i
+                        end
+                        i = i + 1
+                    end
                 end
             end
 
-            return currentIndex + line:len()
+            return i + 1
         end
     end
 
@@ -269,16 +278,16 @@ end
 
 -- Represents colors with '^' [0-9]
 Graphics._ColorEscapes = {
-    [0] = {0, 0, 0, 1}, -- black
-    [1] = {1, 0, 0, 1}, -- red
-    [2] = {0, 1, 0, 1}, -- green
-    [3] = {0, 0, 1, 1}, -- blue
-    [4] = {1, 1, 0, 1}, -- yellow
-    [5] = {1, 0, 1, 1}, -- purple
-    [6] = {0, 1, 1, 1}, -- aqua
-    [7] = {1, 1, 1, 1}, -- white
-    [8] = {0.7, 0.7, 0.7, 1}, -- gray
-    [9] = {0.4, 0.4, 0.4, 1}, -- dark gray
+    [0] = {0, 0, 0, 1, size = 2}, -- black
+    [1] = {1, 0, 0, 1, size = 2}, -- red
+    [2] = {0, 1, 0, 1, size = 2}, -- green
+    [3] = {0, 0, 1, 1, size = 2}, -- blue
+    [4] = {1, 1, 0, 1, size = 2}, -- yellow
+    [5] = {1, 0, 1, 1, size = 2}, -- purple
+    [6] = {0, 1, 1, 1, size = 2}, -- aqua
+    [7] = {1, 1, 1, 1, size = 2}, -- white
+    [8] = {0.7, 0.7, 0.7, 1, size = 2}, -- gray
+    [9] = {0.4, 0.4, 0.4, 1, size = 2}, -- dark gray
 }
 
 function Graphics:SplitColoredText(text)
@@ -304,6 +313,7 @@ function Graphics:SplitColoredText(text)
                         tonumber(text:sub(i + 4, i + 5), 16) / 255, -- g
                         tonumber(text:sub(i + 6, i + 7), 16) / 255, -- b
                         1, -- a
+                        size = 8,
                     },
                     resultLen + 2
                 i = i + 8
