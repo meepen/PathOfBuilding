@@ -358,6 +358,7 @@ end
 function launch:ShowErrMsg(fmt, ...)
 	if not self.promptMsg then
 		self:ShowPrompt(1, 0, 0, "^1Error:\n\n^0" .. string.format(fmt, ...) .. "\n\nPress Enter/Escape to Dismiss, or F5 to restart the application.")
+		print(string.format(fmt, ...))
 	end
 end
 

@@ -12,7 +12,7 @@ function love.conf(t)
     t.window.height = 600
     t.window.resizable = true
     t.window.vsync = 1
-    t.window.stencil = 1
+    t.window.stencil = 8
     t.window.highdpi = false
     t.window.usedpiscale = true         -- Enable automatic DPI scaling when highdpi is set to true as well (boolean)
 
