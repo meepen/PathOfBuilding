@@ -4,8 +4,8 @@ local FileSystem = require("Engine.Love2D.FileSystem").New()
 local Engine = {}
 local EngineMt = { __index = Engine }
 
-function Engine:NewFileSearch(spec, includeFolders)
-    return FileSystem:NewSearchHandle(spec, includeFolders)
+function Engine:NewFileSearch(spec, onlyDirectories)
+    return FileSystem:NewSearchHandle(spec, onlyDirectories)
 end
 
 -- General Functions
