@@ -47,7 +47,7 @@ local function memoizeLookupTable(...)
             end
             self[k] = value
             return value
-        end
+        end,
     }
     local memoized = setmetatable({
         [argumentIndex] = {},
@@ -125,29 +125,10 @@ function Graphics:SetDrawColor(r, g, b, a)
         r, g, b, a = r[1], r[2], r[3], r[4]
     end
 
-    self._drawColor = {r, g, b, a}
+    return love.graphics.setColor(r, g, b, a)
 end
 
-function Graphics:_InsertInstruction(what, ...)
-    table.insert(self._activeLayer.actionsLookup[self._viewport][self._drawColor], {
-        Key = what,
-        ...
-    })
-end
-
-function Graphics:DrawImage(...)
-    self:_InsertInstruction("_RealDrawImage", ...)
-end
-
-function Graphics:DrawImageQuad(...)
-    self:_InsertInstruction("_RealDrawImageQuad", ...)
-end
-
-function Graphics:DrawString(...)
-    self:_InsertInstruction("_RealDrawString", ...)
-end
-
-function Graphics:_RealDrawImage(img, left, top, width, height, tcLeft, tcTop, tcRight, tcBottom)
+function Graphics:DrawImage(img, left, top, width, height, tcLeft, tcTop, tcRight, tcBottom)
     if img then
         local sx, sy = 1, 1
         local realWidth, realHeight = img:ImageSize()
@@ -159,7 +140,7 @@ function Graphics:_RealDrawImage(img, left, top, width, height, tcLeft, tcTop, t
         end
 
         if tcLeft then
-            self:_RealDrawImageQuad(
+            self:DrawImageQuad(
                 img, 
                 left, top, 
                 left + width, top, 
@@ -179,7 +160,7 @@ function Graphics:_RealDrawImage(img, left, top, width, height, tcLeft, tcTop, t
 end
 
 
-function Graphics:_RealDrawImageQuad(img, x1, y1, x2, y2, x3, y3, x4, y4, s1, t1, s2, t2, s3, t3, s4, t4)
+function Graphics:DrawImageQuad(img, x1, y1, x2, y2, x3, y3, x4, y4, s1, t1, s2, t2, s3, t3, s4, t4)
     local xOffset, yOffset = self.translateX, self.translateY
     if not s1 then
         s1, t1, s2, t2, s3, t3, s4, t4 = 
@@ -199,7 +180,7 @@ function Graphics:_RealDrawImageQuad(img, x1, y1, x2, y2, x3, y3, x4, y4, s1, t1
     love.graphics.draw(_mesh)
 end
 
-function Graphics:_RealDrawString(left, top, align, height, font, text)
+function Graphics:DrawString(left, top, align, height, font, text)
     text = tostring(text)
     local fontObject = love.graphics.getFont()
 
@@ -377,63 +358,72 @@ function Graphics:SetDrawLayer(layer, subLayer)
     if not subLayer then
         subLayer = 0
     end
+
+    local activeLayer = self._layerLookup[layer + subLayer / 1000]
+
+    if activeLayer == self._activeLayer then
+        return
+    end
     
-    self._activeLayer = self._layerLookup[layer][subLayer]
+    self._activeLayer = activeLayer
+    love.graphics.setCanvas(activeLayer.canvas)
     if self._activeLayer._lastFrame ~= self.frame then
         self._activeLayer._lastFrame = self.frame
-        table.insert(self._layers, self._activeLayer)
     end
 end
 
 function Graphics:SetViewport(x, y, width, height)
     if x then
-        self._viewport = { x, y, width, height }
+        self.translateX, self.translateY = x, y
+        love.graphics.setScissor(x, y, width, height)
     else
-        self._viewport = nil
-    end
-end
-
-local function canvasSorter(a, b)
-    if a.layer < b.layer then
-        return true
-    elseif a.layer > b.layer then
-        return false
-    elseif a.subLayer < b.subLayer then
-        return true
-    else
-        return false
+        self.translateX, self.translateY = 0, 0
+        love.graphics.setScissor()
     end
 end
 
 function Graphics:RenderFrame()
-    self.frame = self.frame + 1
-    self._layers = {}
+    local lastWidth, lastHeight = self._lastWidth, self._lastHeight
+    self._lastWidth, self._lastHeight = self:GetScreenSize()
+    if lastWidth ~= self._lastWidth or lastHeight ~= self._lastHeight then
+        for _, layer in pairs(self._layers) do
+            layer.canvas:release()
+            layer.canvas = love.graphics.newCanvas(self._lastWidth, self._lastHeight)
+        end
+    end
 
+    love.graphics.setScissor()
+    for _, layer in ipairs(self._layers) do
+        if self.frame == layer._lastFrame then
+            love.graphics.setCanvas(layer.canvas)
+            love.graphics.clear()
+        end
+    end
+    love.graphics.setCanvas()
+    love.graphics.clear(1, 0, 0, 1)
+    self._activeLayer = nil
+
+    self.frame = self.frame + 1
 
     self:SetDrawLayer(0, 0)
     self:SetDrawColor(1, 1, 1, 1)
     callbacks:Run("OnFrame")
+end
 
+function Graphics:_Present()
+    love.graphics.setCanvas()
     love.graphics.setScissor()
     love.graphics.clear()
-    local defaultViewport = {0, 0, self:GetScreenSize()}
-    table.sort(self._layers, canvasSorter)
+    love.graphics.setColor(1, 1, 1, 1)
     for _, layer in ipairs(self._layers) do
-        for _, actionList in pairs(layer.actions) do
-            local viewport = actionList.viewport or defaultViewport
-            
-            self.translateX, self.translateY = viewport[1] or 0, viewport[2] or 0
-            love.graphics.setScissor(viewport[1], viewport[2], viewport[3], viewport[4])
-
-            local color = actionList.color
-            love.graphics.setColor(color[1], color[2], color[3], color[4])
-
-            for _, action in ipairs(actionList) do
-                self[action.Key](self, unpack(action, 1, #action))
-            end
+        if self.frame == layer._lastFrame then
+            love.graphics.draw(layer.canvas, 0, 0)
         end
-        layer.actions = {}
     end
+end
+
+local function canvasSorter(a, b)
+    return a.layer < b.layer
 end
 
 return {
@@ -441,36 +431,26 @@ return {
         local newObject
         newObject = setmetatable({
             frame = 0,
-            _screenState = {
-                vsync = 1,
-                resizable = true,
-            },
-            _layerLookup = memoizeLookupTable("layer", "subLayer", function(args)
-                local newLayer
-                newLayer = {
+            translateX = 0,
+            translateY = 0,
+            _layers = {},
+            _layerLookup = memoizeLookupTable("layer", function(args)
+                local newLayer = {
                     layer = args.layer,
-                    subLayer = args.subLayer,
-                    actions = {},
-                    actionsLookup = memoizeLookupTable("viewport", "drawColor", function(args)
-                        local todo = {
-                            color = args.drawColor,
-                            viewport = args.viewport,
-                        }
-
-                        table.insert(newLayer.actions, todo)
-
-                        return todo
-                    end),
+                    canvas = love.graphics.newCanvas(newObject:GetScreenSize()),
                 }
                 if not args.layer then
                     error "layer required"
                 end
-                if not args.subLayer then
-                    error "subLayer required"
-                end
+                table.insert(newObject._layers, newLayer)
+                table.sort(newObject._layers, canvasSorter)
 
                 return newLayer
             end),
+            _screenState = {
+                vsync = 1,
+                resizable = true,
+            },
             _clearColor = {1, 0, 0, 1},
             _GetScreenSize   = love.graphics.getDimensions,
             _SetDrawColor    = love.graphics.setColor,
@@ -484,6 +464,8 @@ return {
             end
 
             newObject:RenderFrame()
+            newObject:_Present()
+
             engine:RenderFrame()
         end
 

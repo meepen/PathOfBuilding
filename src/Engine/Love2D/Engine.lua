@@ -120,8 +120,7 @@ function Engine:RenderFrame()
 
     if self._showDebugStats then
         local stats = love.graphics.getStats()
-        local height = 24
-        local font = "VAR"
+        local font = love.graphics.getFont()
         local statsText = string.format(
             "FPS: %.2f\n" ..
             "Draws: %i\n" ..
@@ -144,11 +143,11 @@ function Engine:RenderFrame()
             stats.drawcallsbatched,
             self.debugText or ""
         )
-        local width = graphics:DrawStringWidth(height, font, statsText)
-        graphics:SetDrawColor(0, 0, 0, 0.5)
-        graphics:DrawImage(nil, 0, 0, width + 10, (select(2, graphics:GetScreenSize())))
-        graphics:SetDrawColor(1, 1, 1, 1)
-        graphics:DrawString(5, 5, "LEFT", height, font, statsText)
+        local width = font:getWidth(statsText)
+        love.graphics.setColor(0, 0, 0, 0.5)
+        love.graphics.rectangle("fill", 0, 0, width + 10, (select(2, graphics:GetScreenSize())))
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.print(statsText, 5, 5)
     end
 end
 

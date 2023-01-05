@@ -1,7 +1,7 @@
 package.path = package.path .. ";../runtime/lua/?.lua;../runtime/lua/?/init.lua"
 
 function love.update(dt)
-    local targetFps = 60
+    local targetFps = 165
     if not love.window.hasFocus() then
         targetFps = 3
     end
