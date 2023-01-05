@@ -1,5 +1,4 @@
 local profile = require("Engine.Love2D.Profiler")
-local LibDeflate = require("Engine.LibDeflate")
 local FileSystem = require("Engine.Love2D.FileSystem").New()
 local Engine = {}
 local EngineMt = { __index = Engine }
@@ -60,10 +59,10 @@ function Engine:Paste()
     return self._Paste()
 end
 function Engine:Deflate(data)
-    return LibDeflate:CompressZlib(data)
+    return love.data.compress("string", "zlib", data)
 end
 function Engine:Inflate(data)
-    return LibDeflate:DecompressZlib(data)
+    return love.data.decompress("string", data)
 end
 function Engine:GetTime()
     return self._GetTime()
